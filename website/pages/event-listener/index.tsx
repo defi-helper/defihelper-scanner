@@ -87,6 +87,7 @@ export function EventListenerPage({ contractId, eventListenerId }: Props) {
           <thead>
             <tr>
               <th>Sender</th>
+              <th>Block</th>
               <th>Transaction</th>
             </tr>
           </thead>
@@ -98,6 +99,7 @@ export function EventListenerPage({ contractId, eventListenerId }: Props) {
                 onClick={() => setEvent(event)}
               >
                 <td>{event.address}</td>
+                <td>{event.blockNumber}</td>
                 <td>{event.transactionHash}</td>
               </tr>
             ))}
