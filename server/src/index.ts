@@ -8,21 +8,6 @@ container.model
   .migrationService()
   .up()
   .then(async () => {
-    /*
-    await container.model
-      .contractService()
-      .create(1, "0x4e995d583d54bdc755748d11d429abdaadcfa0b7", null, 12171530);
-      */
-
-    /*
-    const contract = await container.model.contractService().table().first();
-    if (contract) {
-      await container.model
-        .contractEventListenerService()
-        .create(contract, "RewardAdded", 12560121);
-    }
-    */
-
     container.model.queueService().createBroker().start();
 
     const express = Express();
