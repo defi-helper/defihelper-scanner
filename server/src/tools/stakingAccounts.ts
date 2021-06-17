@@ -34,6 +34,14 @@ export async function main() {
   let i = 0;
   await addresses.reduce(async (prev: Promise<any>, address: string) => {
     await prev;
+    const duplicate = await stakingBalanceService
+      .table()
+      .where({
+        contract: contract.id,
+        address,
+      })
+      .first();
+    if (duplicate) return;
 
     const stakingBalance = await stakingBalanceService.create(
       contract,
