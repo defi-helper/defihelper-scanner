@@ -3,6 +3,7 @@
 * Create `.env` on root with:
 
 ```
+DATABASE_HOST=
 DATABASE_USER=
 DATABASE_PASSWORD=
 DATABASE_NAME=
@@ -14,3 +15,7 @@ BSC_NODE=
 * `npm run server-build`
 * `npm run website-build`
 * `npm run start`
+
+# staking balance
+
+* `npm run tool stakingAccounts :listener-id`
