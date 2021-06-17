@@ -72,7 +72,7 @@ export class ContractService {
 async function eventResolver({ id }: EventListener) {
   return container.model
     .queueService()
-    .push("resolveEvents", { id, step: 10000 });
+    .push("resolveEvents", { id, step: 5000 });
 }
 
 export class EventListenerService {

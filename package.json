@@ -9,7 +9,8 @@
     "server-watch": "tsc-watch -p ./server --pretty --onSuccess 'nodejs ./server/dist/index.js'",
     "website-build": "webpack --config ./website/webpack.config.ts",
     "website-watch": "webpack --config ./website/webpack.config.ts --watch",
-    "start": "node dist"
+    "start": "node dist",
+    "tool": "node ./server/dist/runTools.js"
   },
   "lint-staged": {
     "./src/**/*.ts": [
