@@ -66,13 +66,27 @@ export default async (process: Process) => {
     )
   );
 
-  await Promise.all(
+  const callBackService = container.model.callBackService();
+  const callBacks = await callBackService.table()
+    .where("eventListener", eventListener.id);
+
+  const createdEvents = await Promise.all(
     events.map((event) => {
       if (duplicateSet.has(`${event.transactionHash}:${event.logIndex}`)) {
         return null;
       }
 
       return eventService.create(eventListener, event);
+    })
+  );
+
+  const eventsIds = createdEvents.map((event) => event ? event.id : null).filter(event => event);
+  await Promise.all(
+    callBacks.map((callBack) => {
+    return container.model.queueService().push("callCallBack", {
+      id: callBack.id,
+      events: eventsIds,
+    });
     })
   );
 

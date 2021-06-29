@@ -2,6 +2,7 @@ import { resolve } from "path";
 import { Container, singleton } from "@services/Container";
 import AppContainer from "@container";
 import * as Models from "@models/index";
+import {CallBackService} from "@models/Callback/Service";
 
 export class ModelContainer extends Container<typeof AppContainer> {
   readonly migrationTable = Models.Migration.Entity.tableFactory(
@@ -54,5 +55,12 @@ export class ModelContainer extends Container<typeof AppContainer> {
 
   readonly stakingBalanceService = singleton(
     () => new Models.Staking.Service.StakingService(this.stakingBalanceTable)
+  );
+
+  readonly callBackTable =
+      Models.Callback.Entity.callBackTableFactory(this.parent.database);
+
+  readonly callBackService = singleton(
+      () => new Models.Callback.Service.CallBackService(this.callBackTable)
   );
 }

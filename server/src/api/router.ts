@@ -307,6 +307,57 @@ export function route(express: Express) {
       return res.json(events);
     }
   );
+
+  contractRouter.get(
+    "/:contractId/event-listener/:listenerId/callBack",
+    async (req, res) => {
+      const callbacks = await container.model
+        .callBackService()
+        .table();
+
+      return res.json(callbacks);
+    }
+  );
+
+  contractRouter.post(
+    "/:contractId/event-listener/:listenerId/callBack",
+    json(),
+    async (req, res) => {
+      const listener = await container.model
+        .contractEventListenerService()
+        .table()
+        .where("id", req.params.listenerId)
+        .first();
+      if (!listener) return res.status(404).send("Event listener not found");
+
+      const { callBackUrl } = req.body;
+
+      if (!callBackUrl) {
+        return res.status(404).send("You have to send callBackUrl in body");
+      }
+
+      const callBack = await container.model.callBackService().create(listener.id, callBackUrl);
+
+      return res.json(callBack);
+    }
+  );
+
+  contractRouter.delete(
+    "/:contractId/event-listener/:listenerId/callBack/:callBackId",
+    async (req, res) => {
+      const callBack = await container.model
+        .callBackService()
+        .table()
+        .where("id", req.params.callBackId)
+        .first();
+      if (!callBack) return res.status(404).send("CallBack not found");
+
+      await container.model.callBackService().delete(callBack);
+
+      return res.status(200).send("");
+    }
+  );
+
   express.use("/api/contract", contractRouter);
 
   const blockchainRouter = Router();
