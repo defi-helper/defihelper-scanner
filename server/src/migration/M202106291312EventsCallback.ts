@@ -7,6 +7,7 @@ export default (schema: SchemaBuilder) => {
     table.string("id", 36).notNullable();
     table.string("eventListener", 36).notNullable();
     table.string("callbackUrl").notNullable();
+    table.dateTime("createdAt").notNullable();
     table.primary(["id"], `${callBackTableName}_pkey`);
     table.unique(["eventListener", "callbackUrl"]);
     table

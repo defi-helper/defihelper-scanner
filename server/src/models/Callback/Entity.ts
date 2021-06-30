@@ -4,6 +4,7 @@ export interface CallBack {
   id: string;
   eventListener: string;
   callbackUrl: string;
+  createdAt: Date;
 }
 
 export const callBackTableName = "callback";

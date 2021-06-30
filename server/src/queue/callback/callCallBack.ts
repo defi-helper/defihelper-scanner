@@ -37,9 +37,6 @@ export default async (process: Process) => {
   if (!contract) {
     throw new Error(`Contract "${eventListener.contract}" not found`);
   }
-  if (contract.abi === null) {
-    return process.later(dayjs().add(1, "minutes").toDate());
-  }
 
   const eventService = container.model.contractEventService();
   const events = await eventService.table().whereIn('id', eventIds);

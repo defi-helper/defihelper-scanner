@@ -1,6 +1,7 @@
 import { Express, Router } from "express";
 import { json } from "body-parser";
 import container from "@container";
+import { URL } from "url";
 
 export function route(express: Express) {
   const contractState = (data: any) => {
@@ -309,7 +310,7 @@ export function route(express: Express) {
   );
 
   contractRouter.get(
-    "/:contractId/event-listener/:listenerId/callBack",
+    "/:contractId/event-listener/:listenerId/call-back",
     async (req, res) => {
       const callbacks = await container.model
         .callBackService()
@@ -320,7 +321,7 @@ export function route(express: Express) {
   );
 
   contractRouter.post(
-    "/:contractId/event-listener/:listenerId/callBack",
+    "/:contractId/event-listener/:listenerId/call-back",
     json(),
     async (req, res) => {
       const listener = await container.model
@@ -333,17 +334,23 @@ export function route(express: Express) {
       const { callBackUrl } = req.body;
 
       if (!callBackUrl) {
-        return res.status(404).send("You have to send callBackUrl in body");
+          return res.status(400).send("You have to send callBackUrl in body");
       }
 
-      const callBack = await container.model.callBackService().create(listener.id, callBackUrl);
+      try {
+          new URL(callBackUrl);
+      } catch {
+          return res.status(400).send("CallBack url in not valid");
+      }
+
+      const callBack = await container.model.callBackService().create(listener, callBackUrl);
 
       return res.json(callBack);
     }
   );
 
   contractRouter.delete(
-    "/:contractId/event-listener/:listenerId/callBack/:callBackId",
+    "/:contractId/event-listener/:listenerId/call-back/:callBackId",
     async (req, res) => {
       const callBack = await container.model
         .callBackService()

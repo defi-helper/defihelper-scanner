@@ -1,19 +1,20 @@
 import { Factory } from "@services/Container";
 import { v4 as uuid } from "uuid";
+import { EventListener } from "@models/Contract/Entity";
 import {
   CallBack,
   CallBackTable,
 } from "./Entity";
 
-
 export class CallBackService {
   constructor(readonly table: Factory<CallBackTable> = table) {}
 
-  async create(eventListenerId: string, callbackUrl: string) {
+  async create(eventListener: EventListener, callbackUrl: string) {
     const created: CallBack = {
       id: uuid(),
-      eventListener: eventListenerId,
+      eventListener: eventListener.id,
       callbackUrl,
+      createdAt: new Date(),
     };
     await this.table().insert(created);
 
