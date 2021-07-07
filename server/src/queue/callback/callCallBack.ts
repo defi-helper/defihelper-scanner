@@ -39,6 +39,7 @@ export default async (process: Process) => {
 
   try {
     await axios.post(callBack.callbackUrl, {
+      eventName: eventListener.name,
       contract,
       events,
     });
