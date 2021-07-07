@@ -3,6 +3,7 @@
     "strict": true,
     "outDir": "./dist",
     "baseUrl": "./src",
+    "rootDir": "./src",
     "paths": {
       "@container": ["./container"],
       "@api/*": ["./api/*"],
