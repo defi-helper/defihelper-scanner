@@ -48,6 +48,8 @@ export interface Event {
   transactionHash: string;
   logIndex: number;
   args: Object;
+  from: string;
+  network: string;
   createdAt: Date;
 }
 

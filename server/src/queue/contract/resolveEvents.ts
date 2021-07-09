@@ -71,12 +71,14 @@ export default async (process: Process) => {
     .where("eventListener", eventListener.id);
 
   const createdEvents = await Promise.all(
-    events.map((event) => {
+    events.map(async (event) => {
       if (duplicateSet.has(`${event.transactionHash}:${event.logIndex}`)) {
         return null;
       }
 
-      return eventService.create(eventListener, event);
+      const from = (await event.getTransactionReceipt()).from;
+
+      return eventService.create(eventListener, event, contract.network.toString(), from);
     })
   );
 

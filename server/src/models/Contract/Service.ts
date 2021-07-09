@@ -121,7 +121,7 @@ export class EventListenerService {
 export class EventService {
   constructor(readonly table: Factory<EventTable> = table) {}
 
-  async create(eventListener: EventListener, event: ethers.Event) {
+  async create(eventListener: EventListener, event: ethers.Event, network: string, from: string) {
     const args = Object.entries(event.args || {}).reduce((res, [k, v]) => {
       if (!isNaN(parseInt(k, 10))) return res;
 
@@ -141,6 +141,8 @@ export class EventService {
       transactionHash: event.transactionHash.toLowerCase(),
       logIndex: event.logIndex,
       args: JSON.stringify(args, null, 4),
+      network,
+      from,
       createdAt: new Date(),
     };
     await this.table().insert(created);
