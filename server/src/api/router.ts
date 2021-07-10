@@ -383,4 +383,19 @@ export function route(express: Express) {
     }
   });
   express.use("/api/eth", blockchainRouter);
+
+  const addressRouter = Router();
+  addressRouter.get('/:address', async (req, res) => {
+      const network = req.query.network;
+      if (!network) return res.status(400).send("Invalid network id");
+
+      const contractsAddresses = await container.model.contractEventTable()
+          .select('address')
+          .where('from', req.params.address)
+          .groupBy('address');
+
+
+      return res.json(contractsAddresses.map(row => row.address));
+  });
+  express.use("/api/address", blockchainRouter);
 }
