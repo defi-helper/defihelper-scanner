@@ -382,6 +382,18 @@ export function route(express: Express) {
       return res.status(404).send("Network not supported");
     }
   });
+    blockchainRouter.get("/:network/txReceipt/:txHash", async (req, res) => {
+        const network = parseInt(req.params.network, 10);
+        if (isNaN(network)) return res.status(400).send("Invalid network id");
+
+        try {
+            const provider = container.blockchain.providerByNetwork(network);
+
+            return res.json(await provider.getTransactionReceipt(req.params.txHash));
+        } catch {
+            return res.status(404).send("Network not supported or tx is not found");
+        }
+    });
   express.use("/api/eth", blockchainRouter);
 
   const addressRouter = Router();
