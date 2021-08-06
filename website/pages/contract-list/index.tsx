@@ -15,6 +15,7 @@ import { Pagination } from "../../components/pagination";
 const networks = {
   1: "Ethereum",
   56: "Binance Smart Chain",
+  137: "Polygon",
 };
 
 interface ContractState {

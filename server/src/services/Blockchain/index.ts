@@ -40,6 +40,7 @@ function providerFactory(host: string) {
 export interface Config {
   ethMainNode: string;
   bscMainNode: string;
+  polygonMainNode: string;
 }
 
 export class BlockchainContainer extends Container<Config> {
@@ -47,12 +48,16 @@ export class BlockchainContainer extends Container<Config> {
 
   readonly bscMain = singleton(providerFactory(this.parent.bscMainNode));
 
+  readonly polygon = singleton(providerFactory(this.parent.polygonMainNode));
+
   readonly providerByNetwork = (network: number) => {
     switch (network) {
       case 1:
         return this.ethMain();
       case 56:
         return this.bscMain();
+      case 137:
+        return this.polygon();
       default:
         throw new Error(`Undefined network ${network}`);
     }
@@ -66,12 +71,18 @@ export class BlockchainContainer extends Container<Config> {
     getContractAbi: useEtherscanContractAbi("https://api.bscscan.com/api"),
   }));
 
+  readonly polygonscan = singleton(() => ({
+    getContractAbi: useEtherscanContractAbi("https://api.polygonscan.com/api"),
+  }));
+
   readonly scanByNetwork = (network: number) => {
     switch (network) {
       case 1:
         return this.etherscan();
       case 56:
         return this.bscscan();
+      case 137:
+        return this.polygonscan();
       default:
         throw new Error(`Undefined network ${network}`);
     }
