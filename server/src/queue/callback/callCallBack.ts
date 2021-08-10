@@ -38,11 +38,12 @@ export default async (process: Process) => {
   const events = await eventService.table().whereIn("id", eventIds);
 
   try {
-    await axios.post(callBack.callbackUrl, {
-      eventName: eventListener.name,
-      contract,
-      events,
-    });
+    if (events.length > 0) {
+      await axios.post(callBack.callbackUrl, {
+        eventName: eventListener.name,
+        events,
+      });
+    }
 
     return process.done();
   } catch (e) {
