@@ -397,5 +397,5 @@ export function route(express: Express) {
 
       return res.json(contractsAddresses.map(row => row.address));
   });
-  express.use("/api/address", blockchainRouter);
+  express.use("/api/address", addressRouter);
 }
