@@ -386,7 +386,7 @@ export function route(express: Express) {
 
   const addressRouter = Router();
   addressRouter.get('/:address', async (req, res) => {
-      const network = req.query.network;
+      const network = req.query.networkId;
       if (!network) return res.status(400).send("Invalid network id");
 
       const contractsAddresses = await container.model.contractEventTable()
