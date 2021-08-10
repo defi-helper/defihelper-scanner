@@ -28,7 +28,7 @@ export function route(express: Express) {
     return {
       name,
       network,
-      address,
+      address: address.toLowerCase(),
       startHeight,
       abi,
     };
@@ -63,7 +63,7 @@ export function route(express: Express) {
       select = select.andWhere("network", parseInt(network));
     }
     if (typeof address === "string" && address !== "") {
-      select = select.andWhere("address", address);
+      select = select.andWhere("address", address.toLowerCase());
     }
     if (typeof name === "string" && name !== "") {
       select = select.andWhere("name", "ilike", `%${name}%`);
@@ -163,7 +163,7 @@ export function route(express: Express) {
     if (isCount) {
       return res.json(await select.count().first());
     } else {
-      select = select.limit(limit).offset(offset);
+      select = select.orderBy("createdAt", "asc").limit(limit).offset(offset);
     }
 
     const listeners = await select;
@@ -391,7 +391,7 @@ export function route(express: Express) {
 
       const contractsAddresses = await container.model.contractEventTable()
           .select('address')
-          .where('from', req.params.address)
+          .where('from', req.params.address.toLowerCase())
           .groupBy('address');
 
 

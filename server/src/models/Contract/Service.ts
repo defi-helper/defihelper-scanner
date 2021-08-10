@@ -54,6 +54,7 @@ export class ContractService {
   async update(contract: Contract) {
     const updated = {
       ...contract,
+      address: contract.address.toLowerCase(),
       abi: contract.abi === null ? null : JSON.stringify(contract.abi, null, 4),
       updatedAt: new Date(),
     };
@@ -142,7 +143,7 @@ export class EventService {
       logIndex: event.logIndex,
       args: JSON.stringify(args, null, 4),
       network,
-      from,
+      from: from.toLowerCase(),
       createdAt: new Date(),
     };
     await this.table().insert(created);
