@@ -10,7 +10,7 @@ export function route(express: Express) {
       return new Error("Invalid name");
     }
     network = parseInt(network, 10);
-    if (isNaN(network) || ![1, 56].includes(network)) {
+    if (isNaN(network) || ![1, 56, 137].includes(network)) {
       return new Error("Invalid network");
     }
     if (typeof address !== "string" || !/0x[a-z0-9]{40}/i.test(address)) {
