@@ -67,7 +67,8 @@ export default async (process: Process) => {
   );
 
   const callBackService = container.model.callBackService();
-  const callBacks = await callBackService.table()
+  const callBacks = await callBackService
+    .table()
     .where("eventListener", eventListener.id);
 
   const createdEvents = await Promise.all(
@@ -78,17 +79,24 @@ export default async (process: Process) => {
 
       const from = (await event.getTransactionReceipt()).from;
 
-      return eventService.create(eventListener, event, contract.network.toString(), from);
+      return eventService.create(
+        eventListener,
+        event,
+        contract.network.toString(),
+        from
+      );
     })
   );
 
-  const eventsIds = createdEvents.map((event) => event ? event.id : null).filter(event => event);
+  const eventsIds = createdEvents
+    .map((event) => (event ? event.id : null))
+    .filter((event) => event);
   await Promise.all(
     callBacks.map((callBack) => {
-    return container.model.queueService().push("callCallBack", {
-      id: callBack.id,
-      events: eventsIds,
-    });
+      return container.model.queueService().push("callCallBack", {
+        id: callBack.id,
+        events: eventsIds,
+      });
     })
   );
 
