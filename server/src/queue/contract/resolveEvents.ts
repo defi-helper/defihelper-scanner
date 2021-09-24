@@ -91,14 +91,16 @@ export default async (process: Process) => {
   const eventsIds = createdEvents
     .map((event) => (event ? event.id : null))
     .filter((event) => event);
-  await Promise.all(
-    callBacks.map((callBack) => {
-      return container.model.queueService().push("callCallBack", {
-        id: callBack.id,
-        events: eventsIds,
-      });
-    })
-  );
+  if (createdEvents.length > 0) {
+    await Promise.all(
+      callBacks.map((callBack) => {
+        return container.model.queueService().push("callCallBack", {
+          id: callBack.id,
+          events: eventsIds,
+        });
+      })
+    );
+  }
 
   const currentEventListener = await eventListenerService
     .table()

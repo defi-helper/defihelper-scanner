@@ -12,5 +12,6 @@ export default {
   blockchain: {
     ethMainNode: process.env.ETH_NODE ?? "",
     bscMainNode: process.env.BSC_NODE ?? "",
+    polygonMainNode: process.env.POLYGON_NODE ?? "",
   },
 };

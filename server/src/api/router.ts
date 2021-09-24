@@ -10,7 +10,7 @@ export function route(express: Express) {
       return new Error("Invalid name");
     }
     network = parseInt(network, 10);
-    if (isNaN(network) || ![1, 56].includes(network)) {
+    if (isNaN(network) || ![1, 56, 137].includes(network)) {
       return new Error("Invalid network");
     }
     if (typeof address !== "string" || !/0x[a-z0-9]{40}/i.test(address)) {
@@ -28,7 +28,7 @@ export function route(express: Express) {
     return {
       name,
       network,
-      address,
+      address: address.toLowerCase(),
       startHeight,
       abi,
     };
@@ -63,7 +63,7 @@ export function route(express: Express) {
       select = select.andWhere("network", parseInt(network));
     }
     if (typeof address === "string" && address !== "") {
-      select = select.andWhere("address", address);
+      select = select.andWhere("address", address.toLowerCase());
     }
     if (typeof name === "string" && name !== "") {
       select = select.andWhere("name", "ilike", `%${name}%`);
@@ -163,7 +163,7 @@ export function route(express: Express) {
     if (isCount) {
       return res.json(await select.count().first());
     } else {
-      select = select.limit(limit).offset(offset);
+      select = select.orderBy("createdAt", "asc").limit(limit).offset(offset);
     }
 
     const listeners = await select;
@@ -386,16 +386,16 @@ export function route(express: Express) {
 
   const addressRouter = Router();
   addressRouter.get('/:address', async (req, res) => {
-      const network = req.query.network;
+      const network = req.query.networkId;
       if (!network) return res.status(400).send("Invalid network id");
 
       const contractsAddresses = await container.model.contractEventTable()
           .select('address')
-          .where('from', req.params.address)
+          .where('from', req.params.address.toLowerCase())
           .groupBy('address');
 
 
       return res.json(contractsAddresses.map(row => row.address));
   });
-  express.use("/api/address", blockchainRouter);
+  express.use("/api/address", addressRouter);
 }
