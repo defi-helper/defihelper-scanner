@@ -1,7 +1,14 @@
 import { v4 as uuid } from "uuid";
 import { Factory } from "@services/Container";
-import { Task, TaskStatus, Table, Process } from "./Entity";
+import { Task, TaskStatus, Table, Process, hasHandler } from "./Entity";
 import * as Handlers from "../../queue";
+
+type Handler = keyof typeof Handlers;
+
+export interface HandleOptions {
+  include?: Handler[];
+  exclude?: Handler[];
+}
 
 export interface BrokerOptions {
   interval: number;
@@ -44,12 +51,6 @@ export class Broker {
   }
 }
 
-type Handler = keyof typeof Handlers;
-
-export interface HandleOptions {
-  handleOnly?: Handler[];
-}
-
 export class QueueService {
   constructor(readonly table: Factory<Table> = table) {}
 
@@ -76,17 +77,23 @@ export class QueueService {
   }
 
   async handle(options: HandleOptions = {}): Promise<boolean> {
-    let select = this.table()
-      .where("status", TaskStatus.Pending)
-      .andWhere("startAt", "<=", new Date())
+    const current = await this.table()
+      .where(function () {
+        this.where("status", TaskStatus.Pending).andWhere(
+          "startAt",
+          "<=",
+          new Date()
+        );
+        if (options.include && options.include.length > 0) {
+          this.whereIn("handler", options.include);
+        }
+        if (options.exclude && options.exclude.length > 0) {
+          this.whereNotIn("handler", options.exclude);
+        }
+      })
       .orderBy("startAt", "asc")
-      .limit(1);
-    if (options.handleOnly && options.handleOnly.length > 0) {
-      const handleOnly = options.handleOnly;
-      select = select.andWhere((b) => b.whereIn("handler", handleOnly));
-    }
-
-    const current = await select.first();
+      .limit(1)
+      .first();
     if (!current) return false;
 
     const lock = await this.table()
@@ -109,6 +116,9 @@ export class QueueService {
   }
 
   createBroker(options: Partial<BrokerOptions> = {}) {
+    if (typeof options.handler === "string" && !hasHandler(options.handler)) {
+      throw new Error(`Invalid queue handler "${options.handler}"`);
+    }
     return new Broker(this, options);
   }
 }

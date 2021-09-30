@@ -9,7 +9,7 @@ export interface Params {
 export default async (process: Process) => {
   const { id } = process.task.params as Params;
   const contractService = container.model.contractService();
-  const contract = await contractService.table().where({ id }).first();
+  const contract = await contractService.contractTable().where({ id }).first();
   if (!contract) {
     throw new Error(`Contract "${id}" not found`);
   }
@@ -17,7 +17,7 @@ export default async (process: Process) => {
 
   try {
     const abi = await scan.getContractAbi(contract.address);
-    await contractService.update({
+    await contractService.updateContract({
       ...contract,
       abi,
     });

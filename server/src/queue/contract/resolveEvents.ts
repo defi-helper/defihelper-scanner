@@ -9,9 +9,8 @@ export interface Params {
 
 export default async (process: Process) => {
   const { id, step = 1000 } = process.task.params as Params;
-  const eventListenerService = container.model.contractEventListenerService();
-  const eventListener = await eventListenerService
-    .table()
+  const eventListener = await container.model
+    .contractEventListenerTable()
     .where("id", id)
     .first();
   if (!eventListener) {
@@ -20,7 +19,7 @@ export default async (process: Process) => {
 
   const contractService = container.model.contractService();
   const contract = await contractService
-    .table()
+    .contractTable()
     .where({ id: eventListener.contract })
     .first();
   if (!contract) {
@@ -77,13 +76,17 @@ export default async (process: Process) => {
         return null;
       }
 
-      const from = (await event.getTransactionReceipt()).from;
+      const [receipt, block] = await Promise.all([
+        event.getTransactionReceipt(),
+        event.getBlock(),
+      ]);
 
       return eventService.create(
         eventListener,
         event,
         contract.network.toString(),
-        from
+        receipt.from,
+        block.timestamp
       );
     })
   );
@@ -102,8 +105,8 @@ export default async (process: Process) => {
     );
   }
 
-  const currentEventListener = await eventListenerService
-    .table()
+  const currentEventListener = await container.model
+    .contractEventListenerTable()
     .where("id", eventListener.id)
     .first();
   if (!currentEventListener) {
@@ -113,7 +116,7 @@ export default async (process: Process) => {
     eventListener.updatedAt
   );
 
-  await eventListenerService.update({
+  await container.model.contractService().updateListener({
     ...currentEventListener,
     syncHeight: isStateUpdated ? currentEventListener.syncHeight : toHeight,
   });

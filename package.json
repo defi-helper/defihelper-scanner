@@ -10,6 +10,7 @@
     "website-build": "webpack --config ./website/webpack.config.ts",
     "website-watch": "webpack --config ./website/webpack.config.ts --watch",
     "start": "node ./server/dist",
+    "queue": "node ./server/dist/queueBroker.js",
     "tool": "node ./server/dist/runTools.js"
   },
   "lint-staged": {
@@ -32,6 +33,7 @@
     "@babel/preset-typescript": "^7.13.0",
     "@babel/runtime": "^7.14.0",
     "@types/bluebird": "^3.5.33",
+    "@types/command-line-args": "^5.2.0",
     "@types/express": "^4.17.11",
     "@types/node": "^14.14.37",
     "@types/react": "^17.0.9",
@@ -64,6 +66,7 @@
     "axios": "^0.21.1",
     "bignumber.js": "^9.0.1",
     "body-parser": "^1.19.0",
+    "command-line-args": "^5.2.0",
     "dayjs": "^1.10.4",
     "dotenv": "^8.2.0",
     "ethers": "5.3.0",

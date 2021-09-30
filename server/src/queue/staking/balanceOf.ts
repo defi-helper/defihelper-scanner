@@ -19,7 +19,7 @@ export default async (process: Process) => {
 
   const contractService = container.model.contractService();
   const contract = await contractService
-    .table()
+    .contractTable()
     .where({ id: stakingBalance.contract })
     .first();
   if (!contract) {

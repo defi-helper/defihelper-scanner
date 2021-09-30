@@ -2,7 +2,7 @@ import { resolve } from "path";
 import { Container, singleton } from "@services/Container";
 import AppContainer from "@container";
 import * as Models from "@models/index";
-import {CallBackService} from "@models/Callback/Service";
+import { CallBackService } from "@models/Callback/Service";
 
 export class ModelContainer extends Container<typeof AppContainer> {
   readonly migrationTable = Models.Migration.Entity.tableFactory(
@@ -28,22 +28,20 @@ export class ModelContainer extends Container<typeof AppContainer> {
     this.parent.database
   );
 
-  readonly contractService = singleton(
-    () => new Models.Contract.Service.ContractService(this.contractTable)
-  );
-
   readonly contractEventListenerTable =
     Models.Contract.Entity.eventListenerTableFactory(this.parent.database);
 
-  readonly contractEventListenerService = singleton(
-    () =>
-      new Models.Contract.Service.EventListenerService(
-        this.contractEventListenerTable
-      )
-  );
-
   readonly contractEventTable = Models.Contract.Entity.eventTableFactory(
     this.parent.database
+  );
+
+  readonly contractService = singleton(
+    () =>
+      new Models.Contract.Service.ContractService(
+        this.contractTable,
+        this.contractEventListenerTable,
+        this.contractEventTable
+      )
   );
 
   readonly contractEventService = singleton(
@@ -57,10 +55,11 @@ export class ModelContainer extends Container<typeof AppContainer> {
     () => new Models.Staking.Service.StakingService(this.stakingBalanceTable)
   );
 
-  readonly callBackTable =
-      Models.Callback.Entity.callBackTableFactory(this.parent.database);
+  readonly callBackTable = Models.Callback.Entity.callBackTableFactory(
+    this.parent.database
+  );
 
   readonly callBackService = singleton(
-      () => new Models.Callback.Service.CallBackService(this.callBackTable)
+    () => new Models.Callback.Service.CallBackService(this.callBackTable)
   );
 }

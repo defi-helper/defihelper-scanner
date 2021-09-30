@@ -1,6 +1,7 @@
 import container from "@container";
 import { Factory } from "@services/Container";
 import { Emitter } from "@services/Event";
+import dayjs from "dayjs";
 import { ethers } from "ethers";
 import { v4 as uuid } from "uuid";
 import {
@@ -8,7 +9,9 @@ import {
   ContractTable,
   EventListener,
   EventListenerTable,
+  eventListenerTableName,
   EventTable,
+  eventTableName,
 } from "./Entity";
 
 async function abiResolver({ id, abi }: Contract) {
@@ -17,18 +20,44 @@ async function abiResolver({ id, abi }: Contract) {
   return container.model.queueService().push("resolveAbi", { id });
 }
 
+async function eventResolver({ id }: EventListener) {
+  return container.model
+    .queueService()
+    .push("resolveEvents", { id, step: 5000 });
+}
+
+export interface ContractStatisticsOptions {
+  filter: {
+    date?: {
+      from: Date;
+      to: Date;
+    };
+    block?: {
+      from: number;
+      to: number;
+    };
+  };
+}
+
 export class ContractService {
-  constructor(readonly table: Factory<ContractTable> = table) {}
+  constructor(
+    readonly contractTable: Factory<ContractTable>,
+    readonly listenerTable: Factory<EventListenerTable>,
+    readonly eventTable: Factory<EventTable>
+  ) {}
 
-  public readonly onCreate = new Emitter<Contract>(abiResolver);
+  public readonly onContractCreated = new Emitter<Contract>(abiResolver);
 
-  public readonly onUpdate = new Emitter<{ prev: Contract; current: Contract }>(
-    ({ current }) => abiResolver(current)
-  );
+  public readonly onContractUpdated = new Emitter<{
+    prev: Contract;
+    current: Contract;
+  }>(({ current }) => abiResolver(current));
 
-  public readonly onDelete = new Emitter<Contract>();
+  public readonly onContractDeleted = new Emitter<Contract>();
 
-  async create(
+  public readonly onListenerCreated = new Emitter<EventListener>(eventResolver);
+
+  async createContract(
     network: number,
     address: string,
     name: string,
@@ -45,43 +74,67 @@ export class ContractService {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    await this.table().insert(created);
-    this.onCreate.emit(created);
+    await this.contractTable().insert(created);
+    this.onContractCreated.emit(created);
 
     return created;
   }
 
-  async update(contract: Contract) {
+  async updateContract(contract: Contract) {
     const updated = {
       ...contract,
       address: contract.address.toLowerCase(),
       abi: contract.abi === null ? null : JSON.stringify(contract.abi, null, 4),
       updatedAt: new Date(),
     };
-    await this.table().where({ id: contract.id }).update(updated);
-    this.onUpdate.emit({ prev: contract, current: updated });
+    await this.contractTable().where({ id: contract.id }).update(updated);
+    this.onContractUpdated.emit({ prev: contract, current: updated });
 
     return updated;
   }
 
-  async delete(contract: Contract) {
-    await this.table().where({ id: contract.id }).delete();
-    this.onDelete.emit(contract);
+  async deleteContract(contract: Contract) {
+    await this.contractTable().where({ id: contract.id }).delete();
+    this.onContractDeleted.emit(contract);
   }
-}
 
-async function eventResolver({ id }: EventListener) {
-  return container.model
-    .queueService()
-    .push("resolveEvents", { id, step: 5000 });
-}
+  async getContractStatistics(
+    contract: Contract,
+    options: ContractStatisticsOptions
+  ) {
+    const uniqueFrom = await this.eventTable()
+      .distinct(`${eventTableName}.from`)
+      .innerJoin(
+        eventListenerTableName,
+        `${eventListenerTableName}.id`,
+        "=",
+        `${eventTableName}.eventListener`
+      )
+      .where(function () {
+        this.where(`${eventListenerTableName}.contract`, contract.id);
+        if (options.filter) {
+          const { date, block } = options.filter;
+          if (date) {
+            this.andWhereBetween(`${eventTableName}.createdAt`, [
+              date.from,
+              date.to,
+            ]);
+          }
+          if (block) {
+            this.andWhereBetween(`${eventTableName}.block`, [
+              block.from,
+              block.to,
+            ]);
+          }
+        }
+      });
 
-export class EventListenerService {
-  constructor(readonly table: Factory<EventListenerTable> = table) {}
+    return {
+      uniqueWalletsCount: uniqueFrom.length,
+    };
+  }
 
-  public readonly onCreate = new Emitter<EventListener>(eventResolver);
-
-  async create(
+  async createListener(
     contract: Contract,
     name: string,
     syncHeight: number = contract.startHeight
@@ -94,35 +147,41 @@ export class EventListenerService {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    await this.table().insert(created);
-    this.onCreate.emit(created);
+    await this.listenerTable().insert(created);
+    this.onListenerCreated.emit(created);
 
     return created;
   }
 
-  async update(eventListener: EventListener) {
+  async updateListener(listener: EventListener) {
     const updated = {
-      ...eventListener,
+      ...listener,
       updatedAt: new Date(),
     };
-    await this.table()
+    await this.listenerTable()
       .where({
-        id: eventListener.id,
+        id: listener.id,
       })
       .update(updated);
 
     return updated;
   }
 
-  async delete(eventListener: EventListener) {
-    await this.table().where({ id: eventListener.id }).delete();
+  async deleteListener(listener: EventListener) {
+    await this.listenerTable().where({ id: listener.id }).delete();
   }
 }
 
 export class EventService {
-  constructor(readonly table: Factory<EventTable> = table) {}
+  constructor(readonly table: Factory<EventTable>) {}
 
-  async create(eventListener: EventListener, event: ethers.Event, network: string, from: string) {
+  async create(
+    eventListener: EventListener,
+    event: ethers.Event,
+    network: string,
+    from: string,
+    timestamp: number
+  ) {
     const args = Object.entries(event.args || {}).reduce((res, [k, v]) => {
       if (!isNaN(parseInt(k, 10))) return res;
 
@@ -144,7 +203,7 @@ export class EventService {
       args: JSON.stringify(args, null, 4),
       network,
       from: from.toLowerCase(),
-      createdAt: new Date(),
+      createdAt: dayjs.unix(timestamp).toDate(),
     };
     await this.table().insert(created);
 

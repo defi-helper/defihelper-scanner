@@ -16,9 +16,8 @@ export default async (process: Process) => {
     throw new Error(`CallBack "${id}" not found`);
   }
 
-  const eventListenerService = container.model.contractEventListenerService();
-  const eventListener = await eventListenerService
-    .table()
+  const eventListener = await container.model
+    .contractEventListenerTable()
     .where("id", callBack.eventListener)
     .first();
   if (!eventListener) {
@@ -27,7 +26,7 @@ export default async (process: Process) => {
 
   const contractService = container.model.contractService();
   const contract = await contractService
-    .table()
+    .contractTable()
     .where({ id: eventListener.contract })
     .first();
   if (!contract) {

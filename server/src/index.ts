@@ -8,8 +8,6 @@ container.model
   .migrationService()
   .up()
   .then(async () => {
-    container.model.queueService().createBroker().start();
-
     const express = Express();
     express.use(Express.static(resolve(__dirname, "../../public")));
     route(express);
