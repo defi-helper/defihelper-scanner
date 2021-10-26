@@ -41,7 +41,22 @@ export interface Config {
   ethMainNode: string;
   bscMainNode: string;
   polygonMainNode: string;
+  avalanchMainNode: string;
 }
+
+const axiosFakeHeaders = {
+  'Host': 'etherscan.io',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+  'Accept-Language': 'en-CA,en-US;q=0.7,en;q=0.3',
+  'Connection': 'keep-alive',
+  'Upgrade-Insecure-Requests': '1',
+  'Sec-Fetch-Dest': 'document',
+  'Sec-Fetch-Mode': 'navigate',
+  'Sec-Fetch-Site': 'none',
+  'Sec-Fetch-User': '?1',
+  'Cache-Control': 'max-age=0',
+  'TE': 'trailers',
+};
 
 export class BlockchainContainer extends Container<Config> {
   readonly ethMain = singleton(providerFactory(this.parent.ethMainNode));
@@ -49,6 +64,8 @@ export class BlockchainContainer extends Container<Config> {
   readonly bscMain = singleton(providerFactory(this.parent.bscMainNode));
 
   readonly polygon = singleton(providerFactory(this.parent.polygonMainNode));
+
+  readonly avalanch = singleton(providerFactory(this.parent.avalanchMainNode));
 
   readonly providerByNetwork = (network: number) => {
     switch (network) {
@@ -58,6 +75,8 @@ export class BlockchainContainer extends Container<Config> {
         return this.bscMain();
       case 137:
         return this.polygon();
+      case 43114:
+        return this.avalanch();
       default:
         throw new Error(`Undefined network ${network}`);
     }
@@ -75,6 +94,13 @@ export class BlockchainContainer extends Container<Config> {
     getContractAbi: useEtherscanContractAbi("https://api.polygonscan.com/api"),
   }));
 
+  readonly avaxexplorer = singleton(() => ({
+    getContractAbi: async (address: string) => {
+        const res = await axios.get(`https://repo.sourcify.dev/contracts/full_match/43114/${address}/metadata.json`);
+        return res.data.output.abi;
+    },
+  }));
+
   readonly scanByNetwork = (network: number) => {
     switch (network) {
       case 1:
@@ -83,6 +109,8 @@ export class BlockchainContainer extends Container<Config> {
         return this.bscscan();
       case 137:
         return this.polygonscan();
+      case 43114:
+        return this.avaxexplorer();
       default:
         throw new Error(`Undefined network ${network}`);
     }
