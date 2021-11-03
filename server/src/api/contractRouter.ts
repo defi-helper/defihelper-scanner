@@ -118,8 +118,8 @@ async function callBackMiddleware(
 
 export default Router()
   .get("/", async (req, res) => {
-    const limit = parseInt((req.query.limit ?? 10).toString());
-    const offset = parseInt((req.query.offset ?? 0).toString());
+    const limit = Number(req.query.limit ?? 10);
+    const offset = Number(req.query.offset ?? 0);
     const isCount = req.query.count === "yes";
     const network = req.query.network;
     const address = req.query.address;
@@ -127,7 +127,7 @@ export default Router()
 
     const select = container.model.contractTable().where(function () {
       if (typeof network === "string" && network !== "") {
-        this.andWhere("network", parseInt(network));
+        this.andWhere("network", Number(network));
       }
       if (typeof address === "string" && address !== "") {
         this.andWhere("address", address.toLowerCase());
@@ -246,8 +246,8 @@ export default Router()
     "/:contractId/event-listener",
     [contractMiddleware],
     async (req: Request<ContractReqParams>, res: Response) => {
-      const limit = parseInt((req.query.limit ?? 10).toString());
-      const offset = parseInt((req.query.offset ?? 0).toString());
+      const limit = Number(req.query.limit ?? 10);
+      const offset = Number(req.query.offset ?? 0);
       const isCount = req.query.count === "yes";
       const name = req.query.name;
 
@@ -335,8 +335,8 @@ export default Router()
       res: Response
     ) => {
       const isCount = req.query.count === "yes";
-      const limit = parseInt((req.query.limit ?? 10).toString());
-      const offset = parseInt((req.query.offset ?? 0).toString());
+      const limit = Number(req.query.limit ?? 10);
+      const offset = Number(req.query.offset ?? 0);
 
       const select = container.model
         .contractEventTable()
