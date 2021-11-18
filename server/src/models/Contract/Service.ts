@@ -121,7 +121,7 @@ export class ContractService {
             ]);
           }
           if (block) {
-            this.andWhereBetween(`${eventTableName}.block`, [
+            this.andWhereBetween(`${eventTableName}.blockNumber`, [
               block.from,
               block.to,
             ]);
