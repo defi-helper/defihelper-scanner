@@ -16,7 +16,7 @@ const networks = {
   1: "Ethereum",
   56: "Binance Smart Chain",
   137: "Polygon",
-  43114: "Avalanch",
+  43114: "Avalanche",
 };
 
 interface ContractState {

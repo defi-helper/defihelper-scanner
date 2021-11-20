@@ -41,7 +41,7 @@ export interface Config {
   ethMainNode: string;
   bscMainNode: string;
   polygonMainNode: string;
-  avalanchMainNode: string;
+  avalancheMainNode: string;
 }
 
 const axiosFakeHeaders = {
@@ -65,7 +65,7 @@ export class BlockchainContainer extends Container<Config> {
 
   readonly polygon = singleton(providerFactory(this.parent.polygonMainNode));
 
-  readonly avalanch = singleton(providerFactory(this.parent.avalanchMainNode));
+  readonly avalanche = singleton(providerFactory(this.parent.avalancheMainNode));
 
   readonly providerByNetwork = (network: number) => {
     switch (network) {
@@ -76,7 +76,7 @@ export class BlockchainContainer extends Container<Config> {
       case 137:
         return this.polygon();
       case 43114:
-        return this.avalanch();
+        return this.avalanche();
       default:
         throw new Error(`Undefined network ${network}`);
     }

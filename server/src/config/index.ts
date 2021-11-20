@@ -13,6 +13,6 @@ export default {
     ethMainNode: process.env.ETH_NODE ?? "",
     bscMainNode: process.env.BSC_NODE ?? "",
     polygonMainNode: process.env.POLYGON_NODE ?? "",
-    avalanchMainNode: process.env.AVALANCH_NODE ?? "https://api.avax.network/ext/bc/C/rpc",
+    avalancheMainNode: process.env.AVALANCHE_NODE ?? "",
   },
 };
