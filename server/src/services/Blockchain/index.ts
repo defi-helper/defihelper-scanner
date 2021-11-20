@@ -94,6 +94,10 @@ export class BlockchainContainer extends Container<Config> {
     getContractAbi: useEtherscanContractAbi("https://api.polygonscan.com/api"),
   }));
 
+  readonly avalanchescan = singleton(() => ({
+    getContractAbi: useEtherscanContractAbi("https://api.snowtrace.io/api"),
+  }));
+
   readonly avaxexplorer = singleton(() => ({
     getContractAbi: async (address: string) => {
         const res = await axios.get(`https://repo.sourcify.dev/contracts/full_match/43114/${address}/metadata.json`);

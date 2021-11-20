@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "lint-staged",
     "server-build": "tsc -p ./server",
-    "server-watch": "tsc-watch -p ./server --pretty --onSuccess 'nodejs ./server/dist/index.js'",
+    "server-watch": "tsc-watch -p ./server --pretty --onSuccess 'node ./server/dist/index.js'",
     "website-build": "webpack --config ./website/webpack.config.ts",
     "website-watch": "webpack --config ./website/webpack.config.ts --watch",
     "start": "node ./server/dist",

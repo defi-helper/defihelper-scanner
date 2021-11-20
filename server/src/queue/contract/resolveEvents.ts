@@ -53,6 +53,7 @@ export default async (process: Process) => {
     eventListener.syncHeight,
     toHeight
   );
+
   const duplicates = await eventService
     .table()
     .columns("transactionHash", "logIndex")
