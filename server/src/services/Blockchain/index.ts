@@ -124,7 +124,7 @@ export class BlockchainContainer extends Container<Config> {
     address: string,
     abi: ethers.ContractInterface,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
-  ) => {
+  ): ethers.Contract => {
     return new ethers.Contract(address, abi, signerOrProvider);
   };
 }

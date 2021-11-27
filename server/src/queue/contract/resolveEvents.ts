@@ -1,6 +1,7 @@
 import { Process } from "@models/Queue/Entity";
 import container from "@container";
 import dayjs from "dayjs";
+import {ethers} from "ethers";
 
 export interface Params {
   id: string;
@@ -29,11 +30,18 @@ export default async (process: Process) => {
     return process.later(dayjs().add(1, "minutes").toDate());
   }
   const provider = container.blockchain.providerByNetwork(contract.network);
-  const contractProvider = container.blockchain.contract(
-    contract.address,
-    contract.abi,
-    provider
-  );
+
+  let contractProvider: ethers.Contract;
+  try {
+    contractProvider = container.blockchain.contract(
+      contract.address,
+      contract.abi,
+      provider
+    );
+  } catch (e) {
+    return process.later(dayjs().add(10, "minutes").toDate());
+  }
+
   if (!contractProvider.filters[eventListener.name]) {
     throw new Error(`Invalid event "${eventListener.name}"`);
   }
@@ -48,11 +56,17 @@ export default async (process: Process) => {
       ? eventListener.syncHeight + step
       : currentBlockNumber;
   const eventService = container.model.contractEventService();
-  const events = await contractProvider.queryFilter(
-    contractProvider.filters[eventListener.name](),
-    eventListener.syncHeight,
-    toHeight
-  );
+
+  let events: ethers.Event[];
+  try {
+    events = await contractProvider.queryFilter(
+      contractProvider.filters[eventListener.name](),
+      eventListener.syncHeight,
+      toHeight
+    );
+  } catch (e) {
+    return process.later(dayjs().add(10, "minutes").toDate());
+  }
 
   const duplicates = await eventService
     .table()
