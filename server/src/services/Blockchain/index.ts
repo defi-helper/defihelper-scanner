@@ -98,12 +98,12 @@ export class BlockchainContainer extends Container<Config> {
     getContractAbi: useEtherscanContractAbi("https://api.snowtrace.io/api"),
   }));
 
-  readonly avaxexplorer = singleton(() => ({
-    getContractAbi: async (address: string) => {
-        const res = await axios.get(`https://repo.sourcify.dev/contracts/full_match/43114/${address}/metadata.json`);
-        return res.data.output.abi;
-    },
-  }));
+  // readonly avaxexplorer = singleton(() => ({
+  //   getContractAbi: async (address: string) => {
+  //       const res = await axios.get(`https://repo.sourcify.dev/contracts/full_match/43114/${address}/metadata.json`);
+  //       return res.data.output.abi;
+  //   },
+  // }));
 
   readonly scanByNetwork = (network: number) => {
     switch (network) {
@@ -114,7 +114,7 @@ export class BlockchainContainer extends Container<Config> {
       case 137:
         return this.polygonscan();
       case 43114:
-        return this.avaxexplorer();
+        return this.avalanchescan();
       default:
         throw new Error(`Undefined network ${network}`);
     }
