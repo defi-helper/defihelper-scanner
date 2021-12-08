@@ -13,7 +13,7 @@ export default {
     ethMainNode: process.env.ETH_NODE ?? "",
     bscMainNode: process.env.BSC_NODE ?? "",
     polygonMainNode: process.env.POLYGON_NODE ?? "",
-    moonriverMainNode: process.env.POLYGON_NODE ?? "",
+    moonriverMainNode: process.env.MOONRIVER_NODE ?? "",
     avalancheMainNode: process.env.AVALANCHE_NODE ?? "",
   },
 };
