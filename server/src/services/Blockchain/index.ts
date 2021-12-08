@@ -41,6 +41,7 @@ export interface Config {
   ethMainNode: string;
   bscMainNode: string;
   polygonMainNode: string;
+  moonriverMainNode: string;
   avalancheMainNode: string;
 }
 
@@ -65,6 +66,8 @@ export class BlockchainContainer extends Container<Config> {
 
   readonly polygon = singleton(providerFactory(this.parent.polygonMainNode));
 
+  readonly moonriver = singleton(providerFactory(this.parent.moonriverMainNode));
+
   readonly avalanche = singleton(providerFactory(this.parent.avalancheMainNode));
 
   readonly providerByNetwork = (network: number) => {
@@ -75,6 +78,8 @@ export class BlockchainContainer extends Container<Config> {
         return this.bscMain();
       case 137:
         return this.polygon();
+      case 1285:
+        return this.moonriver();
       case 43114:
         return this.avalanche();
       default:
@@ -92,6 +97,10 @@ export class BlockchainContainer extends Container<Config> {
 
   readonly polygonscan = singleton(() => ({
     getContractAbi: useEtherscanContractAbi("https://api.polygonscan.com/api"),
+  }));
+
+  readonly moonriverscan = singleton(() => ({
+    getContractAbi: useEtherscanContractAbi("https://api-moonriver.moonscan.io/api"),
   }));
 
   readonly avalanchescan = singleton(() => ({
@@ -113,6 +122,8 @@ export class BlockchainContainer extends Container<Config> {
         return this.bscscan();
       case 137:
         return this.polygonscan();
+      case 1285:
+        return this.moonriverscan();
       case 43114:
         return this.avalanchescan();
       default:
