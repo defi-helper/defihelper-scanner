@@ -1,7 +1,7 @@
 import { Process } from "@models/Queue/Entity";
 import container from "@container";
 import dayjs from "dayjs";
-import {ethers} from "ethers";
+import { ethers } from "ethers";
 
 export interface Params {
   id: string;
@@ -39,6 +39,7 @@ export default async (process: Process) => {
       provider
     );
   } catch (e) {
+    console.error(e);
     return process.later(dayjs().add(10, "minutes").toDate());
   }
 
@@ -65,6 +66,7 @@ export default async (process: Process) => {
       toHeight
     );
   } catch (e) {
+    console.error(e);
     return process.later(dayjs().add(10, "minutes").toDate());
   }
 
