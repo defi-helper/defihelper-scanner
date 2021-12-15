@@ -34,7 +34,11 @@ function useEtherscanContractAbi(host: string) {
 }
 
 function providerFactory(host: string) {
-  return () => new ethers.providers.JsonRpcProvider(host);
+  return () =>
+    new ethers.providers.JsonRpcProvider({
+      url: host,
+      timeout: 300,
+    });
 }
 
 export interface Config {
@@ -46,17 +50,18 @@ export interface Config {
 }
 
 const axiosFakeHeaders = {
-  'Host': 'etherscan.io',
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-  'Accept-Language': 'en-CA,en-US;q=0.7,en;q=0.3',
-  'Connection': 'keep-alive',
-  'Upgrade-Insecure-Requests': '1',
-  'Sec-Fetch-Dest': 'document',
-  'Sec-Fetch-Mode': 'navigate',
-  'Sec-Fetch-Site': 'none',
-  'Sec-Fetch-User': '?1',
-  'Cache-Control': 'max-age=0',
-  'TE': 'trailers',
+  Host: "etherscan.io",
+  Accept:
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+  "Accept-Language": "en-CA,en-US;q=0.7,en;q=0.3",
+  Connection: "keep-alive",
+  "Upgrade-Insecure-Requests": "1",
+  "Sec-Fetch-Dest": "document",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-Site": "none",
+  "Sec-Fetch-User": "?1",
+  "Cache-Control": "max-age=0",
+  TE: "trailers",
 };
 
 export class BlockchainContainer extends Container<Config> {
@@ -66,9 +71,13 @@ export class BlockchainContainer extends Container<Config> {
 
   readonly polygon = singleton(providerFactory(this.parent.polygonMainNode));
 
-  readonly moonriver = singleton(providerFactory(this.parent.moonriverMainNode));
+  readonly moonriver = singleton(
+    providerFactory(this.parent.moonriverMainNode)
+  );
 
-  readonly avalanche = singleton(providerFactory(this.parent.avalancheMainNode));
+  readonly avalanche = singleton(
+    providerFactory(this.parent.avalancheMainNode)
+  );
 
   readonly providerByNetwork = (network: number) => {
     switch (network) {
@@ -100,7 +109,9 @@ export class BlockchainContainer extends Container<Config> {
   }));
 
   readonly moonriverscan = singleton(() => ({
-    getContractAbi: useEtherscanContractAbi("https://api-moonriver.moonscan.io/api"),
+    getContractAbi: useEtherscanContractAbi(
+      "https://api-moonriver.moonscan.io/api"
+    ),
   }));
 
   readonly avalanchescan = singleton(() => ({
