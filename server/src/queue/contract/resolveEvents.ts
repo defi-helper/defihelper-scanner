@@ -131,7 +131,6 @@ export default async (process: Process) => {
       })
     );
   }
-  s;
 
   const currentEventListener = await container.model
     .contractEventListenerTable()
