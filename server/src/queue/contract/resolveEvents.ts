@@ -1,7 +1,7 @@
 import { Process } from "@models/Queue/Entity";
 import container from "@container";
 import dayjs from "dayjs";
-import {ethers} from "ethers";
+import { ethers } from "ethers";
 
 export interface Params {
   id: string;
@@ -39,14 +39,24 @@ export default async (process: Process) => {
       provider
     );
   } catch (e) {
-    return process.later(dayjs().add(10, "minutes").toDate());
+    return process
+      .info("42: Unable to create contract")
+      .later(dayjs().add(10, "minutes").toDate());
   }
 
   if (!contractProvider.filters[eventListener.name]) {
     throw new Error(`Invalid event "${eventListener.name}"`);
   }
 
-  const currentBlockNumber = await provider.getBlockNumber();
+  let currentBlockNumber;
+  try {
+    currentBlockNumber = await provider.getBlockNumber();
+  } catch (e) {
+    return process
+      .info("56: Unable to resolve block number")
+      .later(dayjs().add(10, "minutes").toDate());
+  }
+
   if (currentBlockNumber <= eventListener.syncHeight) {
     return process.later(dayjs().add(1, "minutes").toDate());
   }
@@ -65,7 +75,9 @@ export default async (process: Process) => {
       toHeight
     );
   } catch (e) {
-    return process.later(dayjs().add(10, "minutes").toDate());
+    return process
+      .info("79: unable to resolve filtered events")
+      .later(dayjs().add(10, "minutes").toDate());
   }
 
   const duplicates = await eventService
@@ -119,6 +131,7 @@ export default async (process: Process) => {
       })
     );
   }
+  s;
 
   const currentEventListener = await container.model
     .contractEventListenerTable()
