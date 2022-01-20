@@ -242,7 +242,9 @@ export function ContractPage({ contractId }: Props) {
         <a href="/">Main</a>
       </div>
       <div>
-        <h3>Listeners:</h3>
+        <h3>
+          Listeners of {contract.name} at network {contract.network}
+        </h3>
         <div className="row">
           <div className="column">
             <select onChange={(e) => setName(e.target.value)} value={name}>
