@@ -34,28 +34,34 @@ function useEtherscanContractAbi(host: string) {
 }
 
 function providerFactory(host: string) {
-  return () => new ethers.providers.JsonRpcProvider(host);
+  return () =>
+    new ethers.providers.JsonRpcProvider({
+      url: host,
+      timeout: 300000,
+    });
 }
 
 export interface Config {
   ethMainNode: string;
   bscMainNode: string;
   polygonMainNode: string;
+  moonriverMainNode: string;
   avalancheMainNode: string;
 }
 
 const axiosFakeHeaders = {
-  'Host': 'etherscan.io',
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-  'Accept-Language': 'en-CA,en-US;q=0.7,en;q=0.3',
-  'Connection': 'keep-alive',
-  'Upgrade-Insecure-Requests': '1',
-  'Sec-Fetch-Dest': 'document',
-  'Sec-Fetch-Mode': 'navigate',
-  'Sec-Fetch-Site': 'none',
-  'Sec-Fetch-User': '?1',
-  'Cache-Control': 'max-age=0',
-  'TE': 'trailers',
+  Host: "etherscan.io",
+  Accept:
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+  "Accept-Language": "en-CA,en-US;q=0.7,en;q=0.3",
+  Connection: "keep-alive",
+  "Upgrade-Insecure-Requests": "1",
+  "Sec-Fetch-Dest": "document",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-Site": "none",
+  "Sec-Fetch-User": "?1",
+  "Cache-Control": "max-age=0",
+  TE: "trailers",
 };
 
 export class BlockchainContainer extends Container<Config> {
@@ -65,7 +71,13 @@ export class BlockchainContainer extends Container<Config> {
 
   readonly polygon = singleton(providerFactory(this.parent.polygonMainNode));
 
-  readonly avalanche = singleton(providerFactory(this.parent.avalancheMainNode));
+  readonly moonriver = singleton(
+    providerFactory(this.parent.moonriverMainNode)
+  );
+
+  readonly avalanche = singleton(
+    providerFactory(this.parent.avalancheMainNode)
+  );
 
   readonly providerByNetwork = (network: number) => {
     switch (network) {
@@ -75,6 +87,8 @@ export class BlockchainContainer extends Container<Config> {
         return this.bscMain();
       case 137:
         return this.polygon();
+      case 1285:
+        return this.moonriver();
       case 43114:
         return this.avalanche();
       default:
@@ -94,16 +108,22 @@ export class BlockchainContainer extends Container<Config> {
     getContractAbi: useEtherscanContractAbi("https://api.polygonscan.com/api"),
   }));
 
+  readonly moonriverscan = singleton(() => ({
+    getContractAbi: useEtherscanContractAbi(
+      "https://api-moonriver.moonscan.io/api"
+    ),
+  }));
+
   readonly avalanchescan = singleton(() => ({
     getContractAbi: useEtherscanContractAbi("https://api.snowtrace.io/api"),
   }));
 
-  readonly avaxexplorer = singleton(() => ({
-    getContractAbi: async (address: string) => {
-        const res = await axios.get(`https://repo.sourcify.dev/contracts/full_match/43114/${address}/metadata.json`);
-        return res.data.output.abi;
-    },
-  }));
+  // readonly avaxexplorer = singleton(() => ({
+  //   getContractAbi: async (address: string) => {
+  //       const res = await axios.get(`https://repo.sourcify.dev/contracts/full_match/43114/${address}/metadata.json`);
+  //       return res.data.output.abi;
+  //   },
+  // }));
 
   readonly scanByNetwork = (network: number) => {
     switch (network) {
@@ -113,8 +133,10 @@ export class BlockchainContainer extends Container<Config> {
         return this.bscscan();
       case 137:
         return this.polygonscan();
+      case 1285:
+        return this.moonriverscan();
       case 43114:
-        return this.avaxexplorer();
+        return this.avalanchescan();
       default:
         throw new Error(`Undefined network ${network}`);
     }

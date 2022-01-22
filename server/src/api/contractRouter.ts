@@ -10,21 +10,21 @@ import { json } from "body-parser";
 const contractState = (data: any) => {
   let { name, network, address, startHeight, abi } = data;
   if (typeof name !== "string" || name === "") {
-    return new Error("Invalid name");
+    return new Error(`Invalid name "${name}"`);
   }
   network = parseInt(network, 10);
-  if (isNaN(network) || ![1, 56, 137, 43114].includes(network)) {
-    return new Error("Invalid network");
+  if (isNaN(network) || ![1, 56, 137, 1285, 43114].includes(network)) {
+    return new Error(`Invalid network "${network}"`);
   }
   if (typeof address !== "string" || !/0x[a-z0-9]{40}/i.test(address)) {
-    return new Error("Invalid address");
+    return new Error(`Invalid address "${address}"`);
   }
   startHeight = parseInt(startHeight, 10);
   if (isNaN(startHeight) || startHeight < 0) {
-    return new Error("Invalid start height");
+    return new Error(`Invalid start height "${startHeight}"`);
   }
   if (typeof abi !== "string") {
-    return new Error("Invalid abi");
+    return new Error(`Invalid abi "${JSON.stringify(abi, null, 4)}"`);
   }
   abi = abi !== "" ? JSON.parse(abi) : null;
 

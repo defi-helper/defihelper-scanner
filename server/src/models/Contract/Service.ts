@@ -23,7 +23,7 @@ async function abiResolver({ id, abi }: Contract) {
 async function eventResolver({ id }: EventListener) {
   return container.model
     .queueService()
-    .push("resolveEvents", { id, step: 5000 });
+    .push("resolveEvents", { id, step: 1000 });
 }
 
 export interface ContractStatisticsOptions {
