@@ -124,17 +124,20 @@ export default Router()
     const network = req.query.network;
     const address = req.query.address;
     const name = req.query.name;
+  
+    const networkFilter = Number(network) || null;
+    const addressFilter = typeof address === "string" && address !== "" ? address.toLowerCase() : null;
+    const nameFilter = typeof name === "string" && name !== "" ? name : null;
 
     const select = container.model.contractTable().where(function () {
-      if (typeof network === "string" && network !== "") {
-        if (!Number(network)) res.status(400).send("Invalid network");
-        this.andWhere("network", Number(network));
+      if (networkFilter) {
+        this.andWhere("network", networkFilter);
       }
-      if (typeof address === "string" && address !== "") {
-        this.andWhere("address", address.toLowerCase());
+      if (addressFilter) {
+        this.andWhere("address", addressFilter);
       }
-      if (typeof name === "string" && name !== "") {
-        this.andWhere("name", "ilike", `%${name}%`);
+      if (nameFilter) {
+        this.andWhere("name", "ilike", `%${nameFilter}%`);
       }
     });
     if (isCount) {
