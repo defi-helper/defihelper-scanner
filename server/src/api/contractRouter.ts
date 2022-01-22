@@ -127,6 +127,7 @@ export default Router()
 
     const select = container.model.contractTable().where(function () {
       if (typeof network === "string" && network !== "") {
+        if (!Number(network)) res.status(400).send("Invalid network");
         this.andWhere("network", Number(network));
       }
       if (typeof address === "string" && address !== "") {
