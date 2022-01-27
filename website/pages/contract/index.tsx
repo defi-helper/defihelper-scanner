@@ -211,7 +211,7 @@ export function ContractPage({ contractId }: Props) {
 
   const onRestart = async (eventListener: EventListener) => {
     if (!eventListener?.lastTask) return;
-    await restartQueueTask(eventListener.lastTask.taskid);
+    await restartQueueTask(eventListener.lastTask.taskId);
     alert("done");
   };
 

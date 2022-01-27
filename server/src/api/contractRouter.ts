@@ -117,8 +117,8 @@ async function callBackMiddleware(
 }
 
 interface ListenerLastTask {
-  listenerid: string;
-  taskid: string;
+  listenerId: string;
+  taskId: string;
   info: string;
   error: string;
   status: string;
@@ -279,32 +279,32 @@ export default Router()
       }
 
       const database = container.database();
-      const eventListenerslist = await select
+      const eventListenersList = await select
         .orderBy("createdAt", "asc")
         .limit(limit)
         .offset(offset);
-      let listenersFor: string[] = eventListenerslist.map((v) => v.id);
+      const listenersFor: string[] = eventListenersList.map((v) => v.id);
 
-      const lastTasks = (await container.model
-        .queueTable()
-        .columns([
-          "status",
-          "info",
-          "error",
-          database.raw("id as taskid"),
-          database.raw("params->>'id' as listenerid"),
-        ])
-        .where((qb) => {
-          if (!listenersFor.length) return;
-          qb.where(database.raw("params->>'id' in (?)", listenersFor));
-        })
-        .orderBy("createdAt", "desc")) as unknown as ListenerLastTask[];
+      let lastTasks: ListenerLastTask[] = [];
+      if (listenersFor.length) {
+        lastTasks = (await container.model
+          .queueTable()
+          .columns([
+            "status",
+            "info",
+            "error",
+            database.raw('id as "taskId"'),
+            database.raw(`params->>'id' as "listenerId"`),
+          ])
+          .where(database.raw("params->>'id' in (?)", listenersFor))
+          .orderBy("createdAt", "desc")) as unknown as ListenerLastTask[];
+      }
 
       return res.json(
-        eventListenerslist.map((v) => {
+        eventListenersList.map((v) => {
           return {
             ...v,
-            lastTask: lastTasks.find((t) => t.listenerid === v.id) || null,
+            lastTask: lastTasks.find((t) => t.listenerId === v.id) || null,
           };
         })
       );

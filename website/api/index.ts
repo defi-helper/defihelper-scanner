@@ -117,8 +117,8 @@ export interface EventListener {
   name: string;
   syncHeight: number;
   lastTask: {
-    listenerid: string;
-    taskid: string;
+    listenerId: string;
+    taskId: string;
     info: string;
     error: string;
     status: string;
