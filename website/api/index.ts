@@ -116,6 +116,12 @@ export interface EventListener {
   contract: string;
   name: string;
   syncHeight: number;
+  lastTask: {
+    listenerid: string;
+    info: string;
+    error: string;
+    status: string;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }

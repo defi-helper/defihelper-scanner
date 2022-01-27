@@ -121,6 +121,13 @@ async function callBackMiddleware(
   return next();
 }
 
+interface ListenerLastTask {
+  listenerid: string;
+  info: string;
+  error: string;
+  status: string;
+}
+
 export default Router()
   .get("/", async (req, res) => {
     const limit = Number(req.query.limit ?? 10);
@@ -276,24 +283,31 @@ export default Router()
       }
 
       const database = container.database();
-      const list = await select
+      const eventListenerslist = await select
         .orderBy("createdAt", "asc")
         .limit(limit)
         .offset(offset);
-      const lastTasks = await container.model
+      let listenersFor: string[] = eventListenerslist.map((v) => v.id);
+
+      const lastTasks = (await container.model
         .queueTable()
-        .column(database.raw("distinct on (params->>'id')"))
-        .whereIn(
-          "params->>'id'",
-          list.map((v) => v.id)
-        )
-        .orderBy("createdAt", "desc");
+        .columns([
+          "status",
+          "info",
+          "error",
+          database.raw("params->>'id' as listenerid"),
+        ])
+        .where((qb) => {
+          if (!listenersFor.length) return;
+          qb.where(database.raw("params->>'id' in (?)", listenersFor));
+        })
+        .orderBy("createdAt", "desc")) as unknown as ListenerLastTask[];
+
       return res.json(
-        list.map((v) => {
-          const lastTask = lastTasks.find((t) => t.params?.id === v.id);
+        eventListenerslist.map((v) => {
           return {
             ...v,
-            lastTask,
+            lastTask: lastTasks.find((t) => t.listenerid === v.id) || null,
           };
         })
       );
