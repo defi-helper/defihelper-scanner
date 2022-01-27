@@ -1,16 +1,11 @@
 import { ContractStatisticsOptions } from "@models/Contract/Service";
-import {
-  Contract,
-  EventListener,
-  eventListenerTableName,
-} from "@models/Contract/Entity";
+import { Contract, EventListener } from "@models/Contract/Entity";
 import { CallBack } from "@models/Callback/Entity";
 import { Router, Request, Response, NextFunction } from "express";
 import { URL } from "url";
 import container from "@container";
 import dayjs from "dayjs";
 import { json } from "body-parser";
-import knex from "knex";
 
 const contractState = (data: any) => {
   let { name, network, address, startHeight, abi } = data;
