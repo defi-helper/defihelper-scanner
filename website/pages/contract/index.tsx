@@ -11,6 +11,7 @@ import {
   createEventListener,
   updateEventListener,
   getEventListenerCount,
+  restartQueueTask,
 } from "../../api";
 import { Modal } from "../../components/modal";
 
@@ -94,6 +95,7 @@ function EventListenerComponent({
   onUpdate,
   onDelete,
   onView,
+  onRestart,
 }: {
   contract: Contract;
   eventListener: EventListener;
@@ -101,6 +103,7 @@ function EventListenerComponent({
   onUpdate: (listener: EventListener) => any;
   onDelete: (listener: EventListener) => any;
   onView: (listener: EventListener) => any;
+  onRestart: (listener: EventListener) => any;
 }) {
   const progress =
     currentBlock === 0
@@ -153,6 +156,14 @@ function EventListenerComponent({
           >
             View last task
           </button>
+
+          <button
+            className="button button-outline"
+            onClick={() => onRestart(eventListener)}
+            disabled={!eventListener.lastTask}
+          >
+            Restart task
+          </button>
         </div>
       </td>
     </tr>
@@ -196,6 +207,12 @@ export function ContractPage({ contractId }: Props) {
 
     await deleteEventListener(contract.id, eventListener.id);
     onReloadEventListenerList();
+  };
+
+  const onRestart = async (eventListener: EventListener) => {
+    if (!eventListener?.lastTask) return;
+    await restartQueueTask(eventListener.lastTask.taskid);
+    alert("done");
   };
 
   const onSave = async (state: EventListenerState) => {
@@ -290,6 +307,7 @@ export function ContractPage({ contractId }: Props) {
                   setEventListenerForm(eventListener)
                 }
                 onView={() => setViewListenerLastTask(eventListener)}
+                onRestart={onRestart}
                 onDelete={onDelete}
               />
             ))}

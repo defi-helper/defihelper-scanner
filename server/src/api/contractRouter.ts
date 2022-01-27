@@ -123,6 +123,7 @@ async function callBackMiddleware(
 
 interface ListenerLastTask {
   listenerid: string;
+  taskid: string;
   info: string;
   error: string;
   status: string;
@@ -295,6 +296,7 @@ export default Router()
           "status",
           "info",
           "error",
+          database.raw("id as taskid"),
           database.raw("params->>'id' as listenerid"),
         ])
         .where((qb) => {

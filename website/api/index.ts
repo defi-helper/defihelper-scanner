@@ -118,6 +118,7 @@ export interface EventListener {
   syncHeight: number;
   lastTask: {
     listenerid: string;
+    taskid: string;
     info: string;
     error: string;
     status: string;
@@ -168,6 +169,10 @@ export async function getEventListener(contractId: string, id: string) {
 
 export async function deleteEventListener(contractId: string, id: string) {
   return axios.delete(`/api/contract/${contractId}/event-listener/${id}`);
+}
+
+export async function restartQueueTask(id: string) {
+  return axios.post(`/api/queue/${id}/restart`);
 }
 
 export async function createEventListener(
