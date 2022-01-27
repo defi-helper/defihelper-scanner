@@ -11,7 +11,7 @@ export class Process {
   info(msg: string) {
     return new Process({
       ...this.task,
-      info: `${this.task.info}${msg}`,
+      info: `${this.task.info}\n\n${msg}`,
     });
   }
 

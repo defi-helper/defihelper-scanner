@@ -1,11 +1,16 @@
 import { ContractStatisticsOptions } from "@models/Contract/Service";
-import { Contract, EventListener } from "@models/Contract/Entity";
+import {
+  Contract,
+  EventListener,
+  eventListenerTableName,
+} from "@models/Contract/Entity";
 import { CallBack } from "@models/Callback/Entity";
 import { Router, Request, Response, NextFunction } from "express";
 import { URL } from "url";
 import container from "@container";
 import dayjs from "dayjs";
 import { json } from "body-parser";
+import knex from "knex";
 
 const contractState = (data: any) => {
   let { name, network, address, startHeight, abi } = data;
@@ -124,9 +129,12 @@ export default Router()
     const network = req.query.network;
     const address = req.query.address;
     const name = req.query.name;
-  
+
     const networkFilter = Number(network) || null;
-    const addressFilter = typeof address === "string" && address !== "" ? address.toLowerCase() : null;
+    const addressFilter =
+      typeof address === "string" && address !== ""
+        ? address.toLowerCase()
+        : null;
     const nameFilter = typeof name === "string" && name !== "" ? name : null;
 
     const select = container.model.contractTable().where(function () {
@@ -267,8 +275,27 @@ export default Router()
         return res.json(await select.count().first());
       }
 
+      const database = container.database();
+      const list = await select
+        .orderBy("createdAt", "asc")
+        .limit(limit)
+        .offset(offset);
+      const lastTasks = await container.model
+        .queueTable()
+        .column(database.raw("distinct on (params->>'id')"))
+        .whereIn(
+          "params->>'id'",
+          list.map((v) => v.id)
+        )
+        .orderBy("createdAt", "desc");
       return res.json(
-        await select.orderBy("createdAt", "asc").limit(limit).offset(offset)
+        list.map((v) => {
+          const lastTask = lastTasks.find((t) => t.params?.id === v.id);
+          return {
+            ...v,
+            lastTask,
+          };
+        })
       );
     }
   )

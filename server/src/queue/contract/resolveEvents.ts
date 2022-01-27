@@ -40,7 +40,7 @@ export default async (process: Process) => {
     );
   } catch (e) {
     return process
-      .info("42: Unable to create contract")
+      .info(`42: Unable to create contract\n${e?.message || "no error"}`)
       .later(dayjs().add(10, "minutes").toDate());
   }
 
@@ -53,7 +53,7 @@ export default async (process: Process) => {
     currentBlockNumber = await provider.getBlockNumber();
   } catch (e) {
     return process
-      .info("56: Unable to resolve block number")
+      .info(`56: Unable to resolve block number\n${e?.message || "no error"}`)
       .later(dayjs().add(10, "minutes").toDate());
   }
 
@@ -76,7 +76,9 @@ export default async (process: Process) => {
     );
   } catch (e) {
     return process
-      .info("79: unable to resolve filtered events")
+      .info(
+        `79: unable to resolve filtered events\n${e?.message || "no error"}`
+      )
       .later(dayjs().add(10, "minutes").toDate());
   }
 
