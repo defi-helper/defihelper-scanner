@@ -59,7 +59,7 @@ export class QueueService {
       ...task,
       status: TaskStatus.Pending,
       startAt: new Date(),
-      error: undefined,
+      error: "",
       updatedAt: new Date(),
     };
     await this.table().update(updated).where("id", updated.id);
