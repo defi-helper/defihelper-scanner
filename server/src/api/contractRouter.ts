@@ -287,7 +287,7 @@ export default Router()
       const listenersFor: string[] = eventListenersList.map((v) => v.id);
 
       let lastTasks: ListenerLastTask[] = [];
-      if (listenersFor.length) {
+      if (listenersFor.length && isIncludeLastTask) {
         lastTasks = (await container.model
           .queueTable()
           .columns([
