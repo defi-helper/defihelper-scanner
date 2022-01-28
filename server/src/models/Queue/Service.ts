@@ -60,7 +60,7 @@ export class QueueService {
       status: TaskStatus.Pending,
       startAt: new Date(),
     };
-    await this.table().update(updated);
+    await this.table().update(updated).where("id", updated.id);
 
     return updated;
   }
