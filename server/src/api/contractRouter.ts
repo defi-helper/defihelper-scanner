@@ -264,6 +264,7 @@ export default Router()
       const limit = Number(req.query.limit ?? 10);
       const offset = Number(req.query.offset ?? 0);
       const isCount = req.query.count === "yes";
+      const isIncludeLastTask = req.query.includeLastTask === "yes";
       const name = req.query.name;
 
       const select = container.model

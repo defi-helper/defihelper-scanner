@@ -138,7 +138,7 @@ export async function getEventListenerList(
   offset: number = 0
 ) {
   const response = await axios.get<EventListener[]>(
-    `/api/contract/${contractId}/event-listener?limit=${limit}&offset=${offset}&name=${
+    `/api/contract/${contractId}/event-listener?includeLastTask=yes&limit=${limit}&offset=${offset}&name=${
       filter.name ?? ""
     }`
   );
