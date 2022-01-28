@@ -116,6 +116,13 @@ export interface EventListener {
   contract: string;
   name: string;
   syncHeight: number;
+  lastTask: {
+    listenerId: string;
+    taskId: string;
+    info: string;
+    error: string;
+    status: string;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -131,7 +138,7 @@ export async function getEventListenerList(
   offset: number = 0
 ) {
   const response = await axios.get<EventListener[]>(
-    `/api/contract/${contractId}/event-listener?limit=${limit}&offset=${offset}&name=${
+    `/api/contract/${contractId}/event-listener?includeLastTask=yes&limit=${limit}&offset=${offset}&name=${
       filter.name ?? ""
     }`
   );
@@ -162,6 +169,10 @@ export async function getEventListener(contractId: string, id: string) {
 
 export async function deleteEventListener(contractId: string, id: string) {
   return axios.delete(`/api/contract/${contractId}/event-listener/${id}`);
+}
+
+export async function restartQueueTask(id: string) {
+  return axios.post(`/api/queue/${id}/restart`);
 }
 
 export async function createEventListener(
