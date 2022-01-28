@@ -122,6 +122,7 @@ interface ListenerLastTask {
   info: string;
   error: string;
   status: string;
+  updatedAt: Date;
 }
 
 export default Router()
@@ -294,6 +295,7 @@ export default Router()
             "status",
             "info",
             "error",
+            "updatedAt",
             database.raw('id as "taskId"'),
             database.raw(`params->>'id' as "listenerId"`),
           ])

@@ -122,6 +122,7 @@ export interface EventListener {
     info: string;
     error: string;
     status: string;
+    updatedAt: Date;
   } | null;
   updatedAt: string;
   createdAt: string;
