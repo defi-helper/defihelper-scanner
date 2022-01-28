@@ -14,6 +14,7 @@ import {
   restartQueueTask,
 } from "../../api";
 import { Modal } from "../../components/modal";
+import moment from "moment";
 
 interface EventListenerState {
   id?: string;
@@ -125,7 +126,7 @@ function EventListenerComponent({
         <div className="progress">
           <span
             className={
-              currentBlock === eventListener.syncHeight ? "green" : "red"
+              currentBlock - eventListener.syncHeight < 100 ? "green" : "red"
             }
             style={{
               width: `${progress}%`,
@@ -137,6 +138,10 @@ function EventListenerComponent({
         </div>
       </td>
       <td>{eventListener.lastTask?.status}</td>
+      <td>
+        {eventListener.lastTask?.updatedAt &&
+          moment(eventListener.lastTask?.updatedAt).fromNow()}
+      </td>
       <td>
         <div>
           <button className="button" onClick={() => onUpdate(eventListener)}>
@@ -292,7 +297,8 @@ export function ContractPage({ contractId }: Props) {
             <tr>
               <th>Name</th>
               <th>Sync progress</th>
-              <th>Last queue status</th>
+              <th>Queue status</th>
+              <th>Queue updated</th>
               <th>Actions</th>
             </tr>
           </thead>
