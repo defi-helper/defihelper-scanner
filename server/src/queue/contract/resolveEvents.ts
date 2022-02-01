@@ -29,7 +29,15 @@ export default async (process: Process) => {
   if (contract.abi === null) {
     return process.later(dayjs().add(1, "minutes").toDate());
   }
-  const provider = container.blockchain.providerByNetwork(contract.network);
+
+  let provider: ethers.providers.JsonRpcProvider;
+  try {
+    provider = container.blockchain.providerByNetwork(contract.network);
+  } catch (e) {
+    return process
+      .info(`Unable to resolve provider\n${e?.message || "no error"}`)
+      .later(dayjs().add(10, "minutes").toDate());
+  }
 
   let contractProvider: ethers.Contract;
   try {
@@ -40,7 +48,7 @@ export default async (process: Process) => {
     );
   } catch (e) {
     return process
-      .info(`42: Unable to create contract\n${e?.message || "no error"}`)
+      .info(`Unable to create contract\n${e?.message || "no error"}`)
       .later(dayjs().add(10, "minutes").toDate());
   }
 
@@ -53,7 +61,7 @@ export default async (process: Process) => {
     currentBlockNumber = await provider.getBlockNumber();
   } catch (e) {
     return process
-      .info(`56: Unable to resolve block number\n${e?.message || "no error"}`)
+      .info(`Unable to resolve block number\n${e?.message || "no error"}`)
       .later(dayjs().add(10, "minutes").toDate());
   }
 
@@ -76,9 +84,7 @@ export default async (process: Process) => {
     );
   } catch (e) {
     return process
-      .info(
-        `79: unable to resolve filtered events\n${e?.message || "no error"}`
-      )
+      .info(`Unable to resolve filtered events\n${e?.message || "no error"}`)
       .later(dayjs().add(10, "minutes").toDate());
   }
 
