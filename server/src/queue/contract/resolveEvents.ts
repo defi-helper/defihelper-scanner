@@ -85,7 +85,7 @@ export default async (process: Process) => {
   } catch (e) {
     return process
       .info(`Unable to resolve filtered events\n${e?.message || "no error"}`)
-      .later(dayjs().add(10, "minutes").toDate());
+      .later(dayjs().add(1, "minutes").toDate());
   }
 
   const duplicates = await eventService
@@ -111,18 +111,22 @@ export default async (process: Process) => {
         return null;
       }
 
-      const [receipt, block] = await Promise.all([
-        event.getTransactionReceipt(),
-        event.getBlock(),
-      ]);
+      try {
+        const [receipt, block] = await Promise.all([
+          event.getTransactionReceipt(),
+          event.getBlock(),
+        ]);
 
-      return eventService.create(
-        eventListener,
-        event,
-        contract.network.toString(),
-        receipt.from,
-        block.timestamp
-      );
+        return eventService.create(
+          eventListener,
+          event,
+          contract.network.toString(),
+          receipt.from,
+          block.timestamp
+        );
+      } catch {}
+
+      return null;
     })
   );
 
