@@ -7,6 +7,7 @@ import { v4 as uuid } from "uuid";
 import {
   Contract,
   ContractTable,
+  Event,
   EventListener,
   EventListenerTable,
   eventListenerTableName,
@@ -190,7 +191,7 @@ export class EventService {
     network: string,
     from: string,
     timestamp: number
-  ) {
+  ): Promise<Event> {
     const args = Object.entries(event.args || {}).reduce((res, [k, v]) => {
       if (!isNaN(parseInt(k, 10))) return res;
 
