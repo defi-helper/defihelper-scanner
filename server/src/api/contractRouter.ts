@@ -116,6 +116,15 @@ async function callBackMiddleware(
   return next();
 }
 
+interface ListenerLastTask {
+  listenerId: string;
+  taskId: string;
+  info: string;
+  error: string;
+  status: string;
+  updatedAt: Date;
+}
+
 export default Router()
   .get("/", async (req, res) => {
     const limit = Number(req.query.limit ?? 10);
@@ -125,15 +134,22 @@ export default Router()
     const address = req.query.address;
     const name = req.query.name;
 
+    const networkFilter = Number(network) || null;
+    const addressFilter =
+      typeof address === "string" && address !== ""
+        ? address.toLowerCase()
+        : null;
+    const nameFilter = typeof name === "string" && name !== "" ? name : null;
+
     const select = container.model.contractTable().where(function () {
-      if (typeof network === "string" && network !== "") {
-        this.andWhere("network", Number(network));
+      if (networkFilter) {
+        this.andWhere("network", networkFilter);
       }
-      if (typeof address === "string" && address !== "") {
-        this.andWhere("address", address.toLowerCase());
+      if (addressFilter) {
+        this.andWhere("address", addressFilter);
       }
-      if (typeof name === "string" && name !== "") {
-        this.andWhere("name", "ilike", `%${name}%`);
+      if (nameFilter) {
+        this.andWhere("name", "ilike", `%${nameFilter}%`);
       }
     });
     if (isCount) {
@@ -249,6 +265,7 @@ export default Router()
       const limit = Number(req.query.limit ?? 10);
       const offset = Number(req.query.offset ?? 0);
       const isCount = req.query.count === "yes";
+      const isIncludeLastTask = req.query.includeLastTask === "yes";
       const name = req.query.name;
 
       const select = container.model
@@ -263,8 +280,36 @@ export default Router()
         return res.json(await select.count().first());
       }
 
+      const database = container.database();
+      const eventListenersList = await select
+        .orderBy("createdAt", "asc")
+        .limit(limit)
+        .offset(offset);
+      const listenersFor: string[] = eventListenersList.map((v) => v.id);
+
+      let lastTasks: ListenerLastTask[] = [];
+      if (listenersFor.length && isIncludeLastTask) {
+        lastTasks = (await container.model
+          .queueTable()
+          .columns([
+            "status",
+            "info",
+            "error",
+            "updatedAt",
+            database.raw('id as "taskId"'),
+            database.raw(`params->>'id' as "listenerId"`),
+          ])
+          .where(database.raw("params->>'id' in (?)", listenersFor))
+          .orderBy("createdAt", "desc")) as unknown as ListenerLastTask[];
+      }
+
       return res.json(
-        await select.orderBy("createdAt", "asc").limit(limit).offset(offset)
+        eventListenersList.map((v) => {
+          return {
+            ...v,
+            lastTask: lastTasks.find((t) => t.listenerId === v.id) || null,
+          };
+        })
       );
     }
   )

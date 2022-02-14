@@ -54,6 +54,19 @@ export class Broker {
 export class QueueService {
   constructor(readonly table: Factory<Table> = table) {}
 
+  async resetAndRestart(task: Task) {
+    const updated = {
+      ...task,
+      status: TaskStatus.Pending,
+      startAt: new Date(),
+      error: "",
+      updatedAt: new Date(),
+    };
+    await this.table().update(updated).where("id", updated.id);
+
+    return updated;
+  }
+
   async push<H extends Handler>(
     handler: H,
     params: Object,

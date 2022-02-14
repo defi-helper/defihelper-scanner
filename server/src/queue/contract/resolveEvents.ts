@@ -2,6 +2,7 @@ import { Process } from "@models/Queue/Entity";
 import container from "@container";
 import dayjs from "dayjs";
 import { ethers } from "ethers";
+import { Event } from "@models/Contract/Entity";
 
 export interface Params {
   id: string;
@@ -29,7 +30,15 @@ export default async (process: Process) => {
   if (contract.abi === null) {
     return process.later(dayjs().add(1, "minutes").toDate());
   }
-  const provider = container.blockchain.providerByNetwork(contract.network);
+
+  let provider: ethers.providers.JsonRpcProvider;
+  try {
+    provider = container.blockchain.providerByNetwork(contract.network);
+  } catch (e) {
+    return process
+      .info(`Unable to resolve provider\n${e?.message || "no error"}`)
+      .later(dayjs().add(10, "minutes").toDate());
+  }
 
   let contractProvider: ethers.Contract;
   try {
@@ -39,15 +48,24 @@ export default async (process: Process) => {
       provider
     );
   } catch (e) {
-    console.error(e);
-    return process.later(dayjs().add(10, "minutes").toDate());
+    return process
+      .info(`Unable to create contract\n${e?.message || "no error"}`)
+      .later(dayjs().add(10, "minutes").toDate());
   }
 
   if (!contractProvider.filters[eventListener.name]) {
     throw new Error(`Invalid event "${eventListener.name}"`);
   }
 
-  const currentBlockNumber = await provider.getBlockNumber();
+  let currentBlockNumber;
+  try {
+    currentBlockNumber = await provider.getBlockNumber();
+  } catch (e) {
+    return process
+      .info(`Unable to resolve block number\n${e?.message || "no error"}`)
+      .later(dayjs().add(10, "minutes").toDate());
+  }
+
   if (currentBlockNumber <= eventListener.syncHeight) {
     return process.later(dayjs().add(1, "minutes").toDate());
   }
@@ -66,8 +84,9 @@ export default async (process: Process) => {
       toHeight
     );
   } catch (e) {
-    console.error(e);
-    return process.later(dayjs().add(10, "minutes").toDate());
+    return process
+      .info(`Unable to resolve filtered events\n${e?.message || "no error"}`)
+      .later(dayjs().add(1, "minutes").toDate());
   }
 
   const duplicates = await eventService
@@ -87,26 +106,33 @@ export default async (process: Process) => {
     .table()
     .where("eventListener", eventListener.id);
 
-  const createdEvents = await Promise.all(
-    events.map(async (event) => {
-      if (duplicateSet.has(`${event.transactionHash}:${event.logIndex}`)) {
-        return null;
-      }
+  let createdEvents: (Event | null)[];
+  try {
+    createdEvents = await Promise.all(
+      events.map(async (event) => {
+        if (duplicateSet.has(`${event.transactionHash}:${event.logIndex}`)) {
+          return null;
+        }
 
-      const [receipt, block] = await Promise.all([
-        event.getTransactionReceipt(),
-        event.getBlock(),
-      ]);
+        const [receipt, block] = await Promise.all([
+          event.getTransactionReceipt(),
+          event.getBlock(),
+        ]);
 
-      return eventService.create(
-        eventListener,
-        event,
-        contract.network.toString(),
-        receipt.from,
-        block.timestamp
-      );
-    })
-  );
+        return eventService.create(
+          eventListener,
+          event,
+          contract.network.toString(),
+          receipt.from,
+          block.timestamp
+        );
+      })
+    );
+  } catch (e) {
+    return process
+      .info(`Unable to create event\n${e?.message || "no error"}`)
+      .later(dayjs().add(5, "minutes").toDate());
+  }
 
   const eventsIds = createdEvents
     .map((event) => (event ? event.id : null))

@@ -11,8 +11,10 @@ import {
   createEventListener,
   updateEventListener,
   getEventListenerCount,
+  restartQueueTask,
 } from "../../api";
 import { Modal } from "../../components/modal";
+import moment from "moment";
 
 interface EventListenerState {
   id?: string;
@@ -93,12 +95,16 @@ function EventListenerComponent({
   currentBlock,
   onUpdate,
   onDelete,
+  onView,
+  onRestart,
 }: {
   contract: Contract;
   eventListener: EventListener;
   currentBlock: number;
   onUpdate: (listener: EventListener) => any;
   onDelete: (listener: EventListener) => any;
+  onView: (listener: EventListener) => any;
+  onRestart: (listener: EventListener) => any;
 }) {
   const progress =
     currentBlock === 0
@@ -120,7 +126,7 @@ function EventListenerComponent({
         <div className="progress">
           <span
             className={
-              currentBlock === eventListener.syncHeight ? "green" : "red"
+              currentBlock - eventListener.syncHeight < 100 ? "green" : "red"
             }
             style={{
               width: `${progress}%`,
@@ -130,6 +136,11 @@ function EventListenerComponent({
         <div style={{ textAlign: "center" }}>
           {eventListener.syncHeight}/{currentBlock}
         </div>
+      </td>
+      <td>{eventListener.lastTask?.status}</td>
+      <td>
+        {eventListener.lastTask?.updatedAt &&
+          moment(eventListener.lastTask?.updatedAt).fromNow()}
       </td>
       <td>
         <div>
@@ -141,6 +152,22 @@ function EventListenerComponent({
             onClick={() => onDelete(eventListener)}
           >
             Delete
+          </button>
+
+          <button
+            className="button button-outline"
+            onClick={() => onView(eventListener)}
+            disabled={!eventListener.lastTask}
+          >
+            View last task
+          </button>
+
+          <button
+            className="button button-outline"
+            onClick={() => onRestart(eventListener)}
+            disabled={!eventListener.lastTask}
+          >
+            Restart task
           </button>
         </div>
       </td>
@@ -156,6 +183,8 @@ export function ContractPage({ contractId }: Props) {
   const [name, setName] = useState<string>("0");
   const [currentBlock, setCurrentBlock] = useState<number>(0);
   const [contract, setContract] = useState<Contract | Error | null>(null);
+  const [viewListenerLastTask, setViewListenerLastTask] =
+    useState<EventListener | null>(null);
   const eventListenersLimit = 10;
   const [eventListenersPage, setEventListenersPage] = useState<number>(1);
   const [eventListeners, setEventListeners] = useState<EventListener[]>([]);
@@ -183,6 +212,12 @@ export function ContractPage({ contractId }: Props) {
 
     await deleteEventListener(contract.id, eventListener.id);
     onReloadEventListenerList();
+  };
+
+  const onRestart = async (eventListener: EventListener) => {
+    if (!eventListener?.lastTask) return;
+    await restartQueueTask(eventListener.lastTask.taskId);
+    alert("done");
   };
 
   const onSave = async (state: EventListenerState) => {
@@ -242,7 +277,9 @@ export function ContractPage({ contractId }: Props) {
         <a href="/">Main</a>
       </div>
       <div>
-        <h3>Listeners:</h3>
+        <h3>
+          Listeners of {contract.name} at network {contract.network}
+        </h3>
         <div className="row">
           <div className="column">
             <select onChange={(e) => setName(e.target.value)} value={name}>
@@ -260,6 +297,8 @@ export function ContractPage({ contractId }: Props) {
             <tr>
               <th>Name</th>
               <th>Sync progress</th>
+              <th>Queue status</th>
+              <th>Queue updated</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -273,6 +312,8 @@ export function ContractPage({ contractId }: Props) {
                 onUpdate={(eventListener) =>
                   setEventListenerForm(eventListener)
                 }
+                onView={() => setViewListenerLastTask(eventListener)}
+                onRestart={onRestart}
                 onDelete={onDelete}
               />
             ))}
@@ -318,6 +359,30 @@ export function ContractPage({ contractId }: Props) {
           )}
         </Modal>
       )}
+
+      <Modal
+        header={<h3>View last task</h3>}
+        isVisible={viewListenerLastTask}
+        onClose={() => setViewListenerLastTask(null)}
+      >
+        <h4>Status: {viewListenerLastTask?.lastTask?.status}</h4>
+        <hr />
+
+        <h4>Info:</h4>
+        <textarea
+          style={{ width: "100%", resize: "vertical" }}
+          value={viewListenerLastTask?.lastTask?.info}
+          rows="20"
+        />
+        <hr />
+
+        <h4>Error:</h4>
+        <textarea
+          style={{ width: "100%", resize: "vertical" }}
+          rows="20"
+          value={viewListenerLastTask?.lastTask?.error}
+        />
+      </Modal>
     </div>
   );
 }

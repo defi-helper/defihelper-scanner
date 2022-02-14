@@ -36,4 +36,21 @@ export function route(express: Express) {
     return res.json(contractsAddresses.map((row) => row.address));
   });
   express.use("/api/address", addressRouter);
+
+  const queueRouter = Router();
+  queueRouter.post("/:taskId/restart", async (req, res) => {
+    const task = await container.model
+      .queueTable()
+      .where("id", req.params.taskId)
+      .first();
+
+    if (!task) {
+      return res.status(404).send("Task not found");
+    }
+
+    return res
+      .status(200)
+      .json(await container.model.queueService().resetAndRestart(task));
+  });
+  express.use("/api/queue", queueRouter);
 }

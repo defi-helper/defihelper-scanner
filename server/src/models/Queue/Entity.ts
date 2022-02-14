@@ -11,7 +11,7 @@ export class Process {
   info(msg: string) {
     return new Process({
       ...this.task,
-      info: `${this.task.info}${msg}`,
+      info: `${msg}\n\n${this.task.info}`.substr(0, 5000),
     });
   }
 

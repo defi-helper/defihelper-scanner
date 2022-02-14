@@ -7,6 +7,7 @@ import { v4 as uuid } from "uuid";
 import {
   Contract,
   ContractTable,
+  Event,
   EventListener,
   EventListenerTable,
   eventListenerTableName,
@@ -139,6 +140,15 @@ export class ContractService {
     name: string,
     syncHeight: number = contract.startHeight
   ) {
+    const existing = await this.listenerTable()
+      .where({
+        name,
+        contract: contract.id,
+      })
+      .first();
+
+    if (existing) return existing;
+
     const created = {
       id: uuid(),
       contract: contract.id,
@@ -181,7 +191,7 @@ export class EventService {
     network: string,
     from: string,
     timestamp: number
-  ) {
+  ): Promise<Event> {
     const args = Object.entries(event.args || {}).reduce((res, [k, v]) => {
       if (!isNaN(parseInt(k, 10))) return res;
 
