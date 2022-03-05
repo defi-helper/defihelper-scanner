@@ -36,7 +36,7 @@ export default async (process: Process) => {
     provider = container.blockchain.providerByNetwork(contract.network);
   } catch (e) {
     return process
-      .info(`Unable to resolve provider\n${e?.message || "no error"}`)
+      .info(`Unable to resolve provider\n${`${e}` || "no error"}`)
       .later(dayjs().add(10, "minutes").toDate());
   }
 
@@ -49,7 +49,7 @@ export default async (process: Process) => {
     );
   } catch (e) {
     return process
-      .info(`Unable to create contract\n${e?.message || "no error"}`)
+      .info(`Unable to create contract\n${`${e}` || "no error"}`)
       .later(dayjs().add(10, "minutes").toDate());
   }
 
@@ -62,7 +62,7 @@ export default async (process: Process) => {
     currentBlockNumber = await provider.getBlockNumber();
   } catch (e) {
     return process
-      .info(`Unable to resolve block number\n${e?.message || "no error"}`)
+      .info(`Unable to resolve block number\n${`${e}` || "no error"}`)
       .later(dayjs().add(10, "minutes").toDate());
   }
 
@@ -85,7 +85,7 @@ export default async (process: Process) => {
     );
   } catch (e) {
     return process
-      .info(`Unable to resolve filtered events\n${e?.message || "no error"}`)
+      .info(`Unable to resolve filtered events\n${`${e}` || "no error"}`)
       .later(dayjs().add(1, "minutes").toDate());
   }
 
@@ -130,7 +130,7 @@ export default async (process: Process) => {
     );
   } catch (e) {
     return process
-      .info(`Unable to create event\n${e?.message || "no error"}`)
+      .info(`Unable to create event\n${`${e}` || "no error"}`)
       .later(dayjs().add(5, "minutes").toDate());
   }
 

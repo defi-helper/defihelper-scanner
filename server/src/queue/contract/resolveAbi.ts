@@ -22,7 +22,7 @@ export default async (process: Process) => {
       abi,
     });
   } catch (e) {
-    if (e.message === "RATE_LIMIT") {
+    if (e instanceof Error && e.message === "RATE_LIMIT") {
       return process.later(dayjs().add(5, "seconds").toDate());
     }
     throw e;
