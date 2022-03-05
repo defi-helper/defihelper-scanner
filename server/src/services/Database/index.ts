@@ -1,5 +1,6 @@
 import knex from "knex";
 import { Factory } from "@services/Container";
+import fs from 'fs';
 
 export interface ConnectFactoryConfig {
   readonly host?: string;
@@ -7,13 +8,25 @@ export interface ConnectFactoryConfig {
   readonly user: string;
   readonly password: string;
   readonly database: string;
+  readonly ssl: string;
 }
 
 export function pgConnectFactory(config: ConnectFactoryConfig) {
   return () =>
     knex({
-      client: "pg",
-      connection: config,
+      client: 'pg',
+      connection: {
+        host: config.host,
+        port: config.port,
+        user: config.user,
+        password: config.password,
+        database: config.database,
+        ssl: config.ssl
+          ? {
+            ca: fs.readFileSync(config.ssl),
+          }
+          : undefined,
+      },
     });
 }
 
