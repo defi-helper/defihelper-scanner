@@ -8,6 +8,7 @@ export default {
     user: process.env.DATABASE_USER ?? "",
     password: process.env.DATABASE_PASSWORD ?? "",
     database: process.env.DATABASE_NAME ?? "",
+    ssl: process.env.DATABASE_SSL ?? "",
   },
   blockchain: {
     ethMainNode: process.env.ETH_NODE ?? "",
