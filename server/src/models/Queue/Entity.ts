@@ -6,7 +6,7 @@ export function hasHandler(handler: string): handler is keyof typeof Handlers {
 }
 
 export class Process {
-  constructor(readonly task: Task = task) {}
+  constructor(readonly task: Task = task) { }
 
   info(msg: string) {
     return new Process({
@@ -32,11 +32,13 @@ export class Process {
     });
   }
 
-  error(e: Error) {
+  error(e: unknown) {
+    let error = e instanceof Error ? String(e.stack) : `${e}`;
+
     return new Process({
       ...this.task,
       status: TaskStatus.Error,
-      error: e.stack ?? e.toString(),
+      error,
       updatedAt: new Date(),
     });
   }
