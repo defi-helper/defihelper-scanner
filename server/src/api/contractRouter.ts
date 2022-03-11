@@ -399,7 +399,20 @@ export default Router()
     async (
       req: Request<ContractReqParams & ListenerReqParams>,
       res: Response
-    ) => res.json(await container.model.callBackService().table())
+    ) => {
+      const isCount = req.query.count === "yes";
+      const limit = Number(req.query.limit ?? 10);
+      const offset = Number(req.query.offset ?? 0);
+
+      const select = container.model
+        .callBackTable()
+        .where("eventListener", req.params.listener.id);
+      if (isCount) {
+        return res.json(await select.count().first());
+      }
+
+      return res.json(await select.limit(limit).offset(offset));
+    }
   )
   .post(
     "/:contractId/event-listener/:listenerId/call-back",
