@@ -34,7 +34,10 @@ export default async (process: Process) => {
   }
 
   const eventService = container.model.contractEventService();
-  const events = await eventService.table().whereIn("id", eventIds);
+  const events = await eventService
+    .table()
+    .select("id", "from", "transactionHash")
+    .whereIn("id", eventIds);
 
   try {
     if (events.length > 0) {
