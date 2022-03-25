@@ -60,4 +60,3 @@ export default async (process: Process) => {
     return process.error(e);
   }
 };
-s
