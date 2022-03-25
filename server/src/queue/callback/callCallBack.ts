@@ -8,6 +8,11 @@ export interface Params {
   events: string[];
 }
 
+const chunk = (arr: {id: string, from: string, transactionHash: string}[], size: number) =>
+  Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+    arr.slice(i * size, i * size + size)
+  );
+
 export default async (process: Process) => {
   const { id, events: eventIds } = process.task.params as Params;
   const callBackService = container.model.callBackService();
@@ -34,17 +39,20 @@ export default async (process: Process) => {
   }
 
   const eventService = container.model.contractEventService();
-  const events = await eventService
-    .table()
-    .select("id", "from", "transactionHash")
-    .whereIn("id", eventIds);
+  const events = chunk(
+    await eventService
+      .table()
+      .select("id", "from", "transactionHash")
+      .whereIn("id", eventIds),
+    100
+  );
 
   try {
     if (events.length > 0) {
-      await axios.post(callBack.callbackUrl, {
+      await Promise.all(events.map(eventList => axios.post(callBack.callbackUrl, {
         eventName: eventListener.name,
-        events,
-      });
+        events: eventList,
+      })))
     }
 
     return process.done();
@@ -52,3 +60,4 @@ export default async (process: Process) => {
     return process.error(e);
   }
 };
+s
