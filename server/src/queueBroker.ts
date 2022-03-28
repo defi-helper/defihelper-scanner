@@ -1,6 +1,9 @@
 import "module-alias/register";
+import "source-map-support/register";
 import cli from "command-line-args";
 import container from "./container";
+import config from "./config";
+import * as Sentry from "@sentry/node";
 
 async function handle() {
   return container.model.queueService().handle();
@@ -12,6 +15,11 @@ function wait(time: number) {
 
 const broker = (interval: number): any =>
   handle().then((r) => wait(r ? 0 : interval).then(() => broker(interval)));
+
+Sentry.init({
+  dsn: config.sentryDsn,
+  tracesSampleRate: 0.8,
+});
 
 container.model
   .migrationService()
