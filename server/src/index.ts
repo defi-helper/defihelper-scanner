@@ -1,9 +1,16 @@
 import "module-alias/register";
+import "source-map-support/register";
 import container from "./container";
 import Express from "express";
 import { resolve } from "path";
 import { route } from "@api/router";
+import config from "./config";
+import * as Sentry from "@sentry/node";
 
+Sentry.init({
+  dsn: config.sentryDsn,
+  tracesSampleRate: 0.8,
+});
 container.model
   .migrationService()
   .up()
