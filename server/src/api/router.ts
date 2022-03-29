@@ -24,13 +24,14 @@ export function route(express: Express) {
 
   const addressRouter = Router();
   addressRouter.get("/:address", async (req, res) => {
-    const network = req.query.networkId;
+    const network = req.query.networkId as string;
     if (!network) return res.status(400).send("Invalid network id");
 
     const contractsAddresses = await container.model
       .contractEventTable()
       .select("address")
       .where("from", req.params.address.toLowerCase())
+      .andWhere("network", network)
       .groupBy("address");
 
     return res.json(contractsAddresses.map((row) => row.address));
