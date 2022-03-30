@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export default {
-  sentryDsn: "https://1ae51bdc9ea14a02a94c74b544063317@o934824.ingest.sentry.io/6293418",
+  sentryDsn: process.env.SENTRY_DSN ?? "",
   database: {
     host: process.env.DATABASE_HOST ?? "localhost",
     port: parseInt(process.env.DATABASE_PORT ?? "5432", 10),
