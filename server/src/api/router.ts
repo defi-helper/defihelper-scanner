@@ -27,15 +27,13 @@ export function route(express: Express) {
   addressRouter.get("/bulk", bodyParser.json(), async (req, res) => {
     const addressList: string[] = req.body;
 
-    if(!Array.isArray(addressList) || addressList.length > 100) {
-      return res.status(400).send("Please put address[] to post body with 100 or less elements");
+    if(!Array.isArray(addressList) || addressList.length > 100 || addressList.length === 0) {
+      return res.status(400).send("Please put address[] to post body with >0 && <=100 elements");
     }
     
     const cases = await container.model
       .walletInteractionTable()
       .whereIn("wallet", addressList.map(v => v.toLowerCase()));
-
-    console.warn(cases)
 
     return res.json(cases.reduce<{ [wallet: string]: { [network: string]: string[] } }>(
       (prev, curr) => ({
