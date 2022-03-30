@@ -1,6 +1,7 @@
 import { Express, Router } from "express";
 import container from "@container";
 import contractRouter from "./contractRouter";
+import bodyParser from "body-parser";
 
 export function route(express: Express) {
   express.use("/api/contract", contractRouter);
@@ -23,6 +24,32 @@ export function route(express: Express) {
   express.use("/api/eth", blockchainRouter);
 
   const addressRouter = Router();
+  addressRouter.get("/bulk", bodyParser.json(), async (req, res) => {
+    const addressList: string[] = req.body;
+
+    if(!Array.isArray(addressList) || addressList.length > 100) {
+      return res.status(400).send("Please put address[] to post body with 100 or less elements");
+    }
+    
+    const cases = await container.model
+      .walletInteractionTable()
+      .whereIn("wallet", addressList.map(v => v.toLowerCase()));
+
+    console.warn(cases)
+
+    return res.json(cases.reduce<{ [wallet: string]: { [network: string]: string[] } }>(
+      (prev, curr) => ({
+        ...prev,
+        [curr.wallet]: {
+          ...(prev[curr.wallet] ?? {}),
+          [curr.network]: [
+            ...(prev[curr.wallet] ? (prev[curr.wallet][curr.network] ?? []) : []),
+            curr.contract,
+          ],
+        }
+      }), {})
+    );
+  });
   addressRouter.get("/:address", async (req, res) => {
     const network = req.query.networkId as string;
     if (!network) return res.status(400).send("Invalid network id");

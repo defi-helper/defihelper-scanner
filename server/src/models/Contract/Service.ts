@@ -1,4 +1,5 @@
 import container from "@container";
+import { WalletInteractionTable } from "@models/WalletInteraction/Entity";
 import { Factory } from "@services/Container";
 import { Emitter } from "@services/Event";
 import dayjs from "dayjs";
@@ -183,7 +184,7 @@ export class ContractService {
 }
 
 export class EventService {
-  constructor(readonly table: Factory<EventTable>) {}
+  constructor(readonly table: Factory<EventTable>, readonly walletInteractionTable: Factory<WalletInteractionTable>) {}
 
   async create(
     eventListener: EventListener,
@@ -215,7 +216,22 @@ export class EventService {
       from: from.toLowerCase(),
       createdAt: dayjs.unix(timestamp).toDate(),
     };
-    await this.table().insert(created);
+
+    await Promise.all([
+      this.table().insert(created),
+      async () => {
+        try {
+          await this.walletInteractionTable().insert({
+            id: uuid(),
+            wallet: from.toLowerCase(),
+            contract: event.address.toLowerCase(),
+            network,
+            eventName: eventListener.name,
+            createdAt: new Date(),
+          })
+        } catch {}
+      },
+    ])
 
     return created;
   }
