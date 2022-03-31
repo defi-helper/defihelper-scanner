@@ -219,14 +219,22 @@ export class EventService {
 
     await Promise.all([
       this.table().insert(created),
-      this.walletInteractionTable().insert({
-        id: uuid(),
+      this.walletInteractionTable().where({
         wallet: from.toLowerCase(),
         contract: event.address.toLowerCase(),
-        network,
-        eventName: eventListener.name,
-        createdAt: new Date(),
-      }).catch(() => null),
+        network
+      }).first().then(interaction => {
+        if(!interaction) return null;
+
+        return this.walletInteractionTable().insert({
+          id: uuid(),
+          wallet: from.toLowerCase(),
+          contract: event.address.toLowerCase(),
+          network,
+          eventName: eventListener.name,
+          createdAt: new Date(),
+        })
+      }),
     ])
 
     return created;
