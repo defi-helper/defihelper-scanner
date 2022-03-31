@@ -24,6 +24,8 @@ export class ModelContainer extends Container<typeof AppContainer> {
     () => new Models.Queue.Service.QueueService(this.queueTable)
   );
 
+  readonly walletInteractionTable = Models.WalletInteraction.Entity.walletInteractionTableFactory(this.parent.database);
+
   readonly contractTable = Models.Contract.Entity.contractTableFactory(
     this.parent.database
   );
@@ -45,7 +47,7 @@ export class ModelContainer extends Container<typeof AppContainer> {
   );
 
   readonly contractEventService = singleton(
-    () => new Models.Contract.Service.EventService(this.contractEventTable)
+    () => new Models.Contract.Service.EventService(this.contractEventTable, this.walletInteractionTable)
   );
 
   readonly stakingBalanceTable =
