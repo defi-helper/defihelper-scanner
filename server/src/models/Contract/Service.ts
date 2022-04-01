@@ -224,7 +224,7 @@ export class EventService {
         contract: event.address.toLowerCase(),
         network
       }).first().then(interaction => {
-        if(!interaction) return null;
+        if(interaction) return null;
 
         return this.walletInteractionTable().insert({
           id: uuid(),
