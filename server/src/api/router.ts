@@ -24,7 +24,7 @@ export function route(express: Express) {
   express.use("/api/eth", blockchainRouter);
 
   const addressRouter = Router();
-  addressRouter.get("/bulk", bodyParser.json(), async (req, res) => {
+  addressRouter.post("/bulk", bodyParser.json(), async (req, res) => {
     const addressList: string[] = req.body;
 
     if(!Array.isArray(addressList) || addressList.length > 100 || addressList.length === 0) {
