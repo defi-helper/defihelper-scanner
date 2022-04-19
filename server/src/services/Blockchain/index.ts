@@ -38,7 +38,8 @@ function providerFactory(host: string, user: string, password: string) {
     new ethers.providers.JsonRpcProvider({
       url: host,
       timeout: 300000,
-      user, password
+      user,
+      password,
     });
 }
 
