@@ -2,7 +2,6 @@ import { resolve } from "path";
 import { Container, singleton } from "@services/Container";
 import AppContainer from "@container";
 import * as Models from "@models/index";
-import { CallBackService } from "@models/Callback/Service";
 
 export class ModelContainer extends Container<typeof AppContainer> {
   readonly migrationTable = Models.Migration.Entity.tableFactory(

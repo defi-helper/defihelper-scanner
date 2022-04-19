@@ -33,11 +33,14 @@ function useEtherscanContractAbi(host: string) {
   };
 }
 
-function providerFactory(host: string) {
+function providerFactory(host: string, authorization: string) {
   return () =>
     new ethers.providers.JsonRpcProvider({
       url: host,
       timeout: 300000,
+      headers: {
+        authorization: `Basic ${authorization}`
+      }
     });
 }
 
@@ -47,6 +50,12 @@ export interface Config {
   polygonMainNode: string;
   moonriverMainNode: string;
   avalancheMainNode: string;
+
+  ethMainNodeAuthorization: string;
+  bscMainNodeAuthorization: string;
+  polygonMainNodeAuthorization: string;
+  moonriverMainNodeAuthorization: string;
+  avalancheMainNodeAuthorization: string;
 }
 
 const axiosFakeHeaders = {
@@ -65,18 +74,39 @@ const axiosFakeHeaders = {
 };
 
 export class BlockchainContainer extends Container<Config> {
-  readonly ethMain = singleton(providerFactory(this.parent.ethMainNode));
+  readonly ethMain = singleton(
+    providerFactory(
+      this.parent.ethMainNode,
+      this.parent.ethMainNodeAuthorization,
+    )
+  );
 
-  readonly bscMain = singleton(providerFactory(this.parent.bscMainNode));
+  readonly bscMain = singleton(
+    providerFactory(
+      this.parent.bscMainNode,
+      this.parent.bscMainNodeAuthorization,
+    )
+  );
 
-  readonly polygon = singleton(providerFactory(this.parent.polygonMainNode));
+  readonly polygon = singleton(
+    providerFactory(
+      this.parent.polygonMainNode,
+      this.parent.polygonMainNodeAuthorization,
+    )
+  );
 
   readonly moonriver = singleton(
-    providerFactory(this.parent.moonriverMainNode)
+    providerFactory(
+      this.parent.moonriverMainNode,
+      this.parent.moonriverMainNodeAuthorization,
+    )
   );
 
   readonly avalanche = singleton(
-    providerFactory(this.parent.avalancheMainNode)
+    providerFactory(
+      this.parent.avalancheMainNode,
+      this.parent.avalancheMainNodeAuthorization,
+    )
   );
 
   readonly providerByNetwork = (network: number) => {

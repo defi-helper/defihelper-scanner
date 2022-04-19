@@ -17,5 +17,11 @@ export default {
     polygonMainNode: process.env.POLYGON_NODE ?? "",
     moonriverMainNode: process.env.MOONRIVER_NODE ?? "",
     avalancheMainNode: process.env.AVALANCHE_NODE ?? "",
+
+    ethMainNodeAuthorization: process.env.ETH_NODE_AUTHORIZATION ?? "",
+    bscMainNodeAuthorization: process.env.BSC_NODE_AUTHORIZATION ?? "",
+    polygonMainNodeAuthorization: process.env.POLYGON_NODE_AUTHORIZATION ?? "",
+    moonriverMainNodeAuthorization: process.env.MOONRIVER_NODE_AUTHORIZATION ?? "",
+    avalancheMainNodeAuthorization: process.env.AVALANCHE_NODE_AUTHORIZATION ?? "",
   },
 };
