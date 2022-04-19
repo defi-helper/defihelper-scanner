@@ -217,16 +217,16 @@ export class EventService {
       createdAt: dayjs.unix(timestamp).toDate(),
     };
 
-    await Promise.all([
-      this.table().insert(created),
-      this.walletInteractionTable().where({
-        wallet: from.toLowerCase(),
-        contract: event.address.toLowerCase(),
-        network
-      }).first().then(interaction => {
-        if(interaction) return null;
+    await this.table().insert(created);
+    const existingInteraction = await this.walletInteractionTable().where({
+      wallet: from.toLowerCase(),
+      contract: event.address.toLowerCase(),
+      network
+    }).first()
 
-        return this.walletInteractionTable().insert({
+    if(!existingInteraction) {
+      try {
+        await this.walletInteractionTable().insert({
           id: uuid(),
           wallet: from.toLowerCase(),
           contract: event.address.toLowerCase(),
@@ -234,9 +234,17 @@ export class EventService {
           eventName: eventListener.name,
           createdAt: new Date(),
         })
-      }),
-    ])
-
+      } catch {
+        throw new Error(
+          'Unable to create interaction: ' + [
+            from.toLowerCase(),
+            event.address.toLowerCase(),
+            network
+          ].join(':')
+        )
+      }
+    }
+    
     return created;
   }
 }
