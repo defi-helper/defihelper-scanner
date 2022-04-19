@@ -33,14 +33,13 @@ function useEtherscanContractAbi(host: string) {
   };
 }
 
-function providerFactory(host: string, authorization: string) {
+function providerFactory(host: string, loginPassword: string) {
+  const [user, password] = loginPassword.split(':');
   return () =>
     new ethers.providers.JsonRpcProvider({
       url: host,
       timeout: 300000,
-      headers: {
-        authorization: `Basic ${authorization}`
-      }
+      user, password
     });
 }
 
