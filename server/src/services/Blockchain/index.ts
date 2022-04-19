@@ -33,8 +33,7 @@ function useEtherscanContractAbi(host: string) {
   };
 }
 
-function providerFactory(host: string, loginPassword: string) {
-  const [user, password] = loginPassword.split(':');
+function providerFactory(host: string, user: string, password: string) {
   return () =>
     new ethers.providers.JsonRpcProvider({
       url: host,
@@ -50,11 +49,17 @@ export interface Config {
   moonriverMainNode: string;
   avalancheMainNode: string;
 
-  ethMainNodeAuthorization: string;
-  bscMainNodeAuthorization: string;
-  polygonMainNodeAuthorization: string;
-  moonriverMainNodeAuthorization: string;
-  avalancheMainNodeAuthorization: string;
+  ethMainNodeUser: string;
+  bscMainNodeUser: string;
+  polygonMainNodeUser: string;
+  moonriverMainNodeUser: string;
+  avalancheMainNodeUser: string;
+
+  ethMainNodePassword: string;
+  bscMainNodePassword: string;
+  polygonMainNodePassword: string;
+  moonriverMainNodePassword: string;
+  avalancheMainNodePassword: string;
 }
 
 const axiosFakeHeaders = {
@@ -76,35 +81,40 @@ export class BlockchainContainer extends Container<Config> {
   readonly ethMain = singleton(
     providerFactory(
       this.parent.ethMainNode,
-      this.parent.ethMainNodeAuthorization,
+      this.parent.ethMainNodeUser,
+      this.parent.ethMainNodePassword,
     )
   );
 
   readonly bscMain = singleton(
     providerFactory(
       this.parent.bscMainNode,
-      this.parent.bscMainNodeAuthorization,
+      this.parent.bscMainNodeUser,
+      this.parent.bscMainNodePassword,
     )
   );
 
   readonly polygon = singleton(
     providerFactory(
       this.parent.polygonMainNode,
-      this.parent.polygonMainNodeAuthorization,
+      this.parent.polygonMainNodeUser,
+      this.parent.polygonMainNodePassword,
     )
   );
 
   readonly moonriver = singleton(
     providerFactory(
       this.parent.moonriverMainNode,
-      this.parent.moonriverMainNodeAuthorization,
+      this.parent.moonriverMainNodeUser,
+      this.parent.moonriverMainNodePassword,
     )
   );
 
   readonly avalanche = singleton(
     providerFactory(
       this.parent.avalancheMainNode,
-      this.parent.avalancheMainNodeAuthorization,
+      this.parent.avalancheMainNodeUser,
+      this.parent.avalancheMainNodePassword,
     )
   );
 
