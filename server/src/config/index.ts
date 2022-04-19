@@ -18,10 +18,16 @@ export default {
     moonriverMainNode: process.env.MOONRIVER_NODE ?? "",
     avalancheMainNode: process.env.AVALANCHE_NODE ?? "",
 
-    ethMainNodeAuthorization: process.env.ETH_NODE_AUTHORIZATION ?? "",
-    bscMainNodeAuthorization: process.env.BSC_NODE_AUTHORIZATION ?? "",
-    polygonMainNodeAuthorization: process.env.POLYGON_NODE_AUTHORIZATION ?? "",
-    moonriverMainNodeAuthorization: process.env.MOONRIVER_NODE_AUTHORIZATION ?? "",
-    avalancheMainNodeAuthorization: process.env.AVALANCHE_NODE_AUTHORIZATION ?? "",
+    ethMainNodeUser: process.env.ETH_NODE_USER ?? "",
+    bscMainNodeUser: process.env.BSC_NODE_USER ?? "",
+    polygonMainNodeUser: process.env.POLYGON_NODE_USER ?? "",
+    moonriverMainNodeUser: process.env.MOONRIVER_NODE_USER ?? "",
+    avalancheMainNodeUser: process.env.AVALANCHE_NODE_USER ?? "",
+
+    ethMainNodePassword: process.env.ETH_NODE_PASSWORD ?? "",
+    bscMainNodePassword: process.env.BSC_NODE_PASSWORD ?? "",
+    polygonMainNodePassword: process.env.POLYGON_NODE_PASSWORD ?? "",
+    moonriverMainNodePassword: process.env.MOONRIVER_NODE_PASSWORD ?? "",
+    avalancheMainNodePassword: process.env.AVALANCHE_NODE_PASSWORD ?? "",
   },
 };
