@@ -4,6 +4,8 @@ import cli from "command-line-args";
 import container from "./container";
 import config from "./config";
 import * as Sentry from "@sentry/node";
+import { TaskStatus } from "@models/Queue/Entity";
+import dayjs from "dayjs";
 
 async function handle() {
   return container.model.queueService().handle();
@@ -20,6 +22,12 @@ Sentry.init({
   dsn: config.sentryDsn,
   tracesSampleRate: 0.8,
 });
+
+
+const result = container.model.queueTable().update({ status: TaskStatus.Pending })
+.whereRaw(`"updatedAt" < CURRENT_DATE - INTERVAL '30 minutes'`)
+.andWhere("status", TaskStatus.Process).toQuery();
+console.warn(result)
 
 container.model
   .migrationService()
