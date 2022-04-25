@@ -41,7 +41,7 @@ export default async (process: Process) => {
   const eventService = container.model.contractEventService();
   const events = chunk(
     await eventService
-      .table()
+      .eventTable()
       .select("id", "from", "transactionHash")
       .whereIn("id", eventIds),
     100
