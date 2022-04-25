@@ -185,7 +185,7 @@ export class ContractService {
 }
 
 export class EventService {
-  constructor(readonly table: Factory<EventTable>, readonly walletInteractionTable: Factory<WalletInteractionTable>) {}
+  constructor(readonly eventTable: Factory<EventTable>, readonly walletInteractionTable: Factory<WalletInteractionTable>) {}
 
   async create(
     eventListener: EventListener,
@@ -218,14 +218,16 @@ export class EventService {
       createdAt: dayjs.unix(timestamp).toDate(),
     };
 
-    await this.table().insert(created);
-    const existingInteraction = await this.walletInteractionTable().where({
-      wallet: from.toLowerCase(),
-      contract: event.address.toLowerCase(),
-      network
-    }).first()
+    const [ existingInteraction ] = await Promise.all([
+      this.walletInteractionTable().where({
+        wallet: from.toLowerCase(),
+        contract: event.address.toLowerCase(),
+        network
+      }).first(),
+      this.eventTable().insert(created),
+    ])
 
-    if(!existingInteraction) {
+    if(existingInteraction === undefined) {
       try {
         await this.walletInteractionTable().insert({
           id: uuid(),
@@ -240,7 +242,13 @@ export class EventService {
           'Unable to create interaction: ' + [
             from.toLowerCase(),
             event.address.toLowerCase(),
-            network
+            network,
+            typeof existingInteraction,
+            this.walletInteractionTable().where({
+              wallet: from.toLowerCase(),
+              contract: event.address.toLowerCase(),
+              network
+            }).toQuery()
           ].join(':')
         )
       }

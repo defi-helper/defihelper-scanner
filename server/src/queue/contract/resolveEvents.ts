@@ -90,7 +90,7 @@ export default async (process: Process) => {
   }
 
   const duplicates = await eventService
-    .table()
+    .eventTable()
     .columns("transactionHash", "logIndex")
     .where("eventListener", eventListener.id)
     .andWhere("blockNumber", ">=", eventListener.syncHeight)
