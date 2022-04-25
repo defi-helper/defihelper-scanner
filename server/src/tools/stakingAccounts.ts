@@ -57,5 +57,4 @@ export async function main() {
   }, Promise.resolve(null));
 
   console.log("done");
-  process.exit(0);
 }
