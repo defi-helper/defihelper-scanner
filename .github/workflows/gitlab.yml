@@ -10,7 +10,7 @@ jobs:
     - name: Mirror + trigger CI
       uses: SvanBoxel/gitlab-mirror-and-ci-action@master
       with:
-        args: "https://adcorn-prod.gitlab.yandexcloud.net/defihelper/adapters"
+        args: "https://adcorn-prod.gitlab.yandexcloud.net/defihelper/scanner"
       env:
         GITLAB_HOSTNAME: "adcorn-prod.gitlab.yandexcloud.net"
         GITLAB_USERNAME: "vkomissarov"
