@@ -14,7 +14,6 @@ RUN npm run website-build
 FROM node:16-alpine
 WORKDIR /app
 COPY . .
-COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/server/dist ./server/dist
 COPY --from=build /app/public/dist ./public/dist
 EXPOSE 8080
