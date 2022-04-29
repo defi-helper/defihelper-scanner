@@ -7,8 +7,19 @@ import container from "@container";
 import dayjs from "dayjs";
 import { json } from "body-parser";
 
-const contractState = (data: any) => {
-  let { name, network, address, startHeight, abi } = data;
+const contractState = (
+  data: any
+):
+  | {
+      name: string;
+      network: number;
+      address: string;
+      startHeight: number;
+      abi: any[];
+      fid: string | null;
+    }
+  | Error => {
+  let { name, network, address, startHeight, abi, fid } = data;
   if (typeof name !== "string" || name === "") {
     return new Error(`Invalid name "${name}"`);
   }
@@ -27,6 +38,9 @@ const contractState = (data: any) => {
     return new Error(`Invalid abi "${JSON.stringify(abi, null, 4)}"`);
   }
   abi = abi !== "" ? JSON.parse(abi) : null;
+  if (typeof fid !== "string" && fid !== undefined) {
+    return new Error("Invalid foreign id");
+  }
 
   return {
     name,
@@ -34,6 +48,7 @@ const contractState = (data: any) => {
     address: address.toLowerCase(),
     startHeight,
     abi,
+    fid: typeof fid === "string" && fid.length > 0 ? fid : null,
   };
 };
 
@@ -133,6 +148,7 @@ export default Router()
     const network = req.query.network;
     const address = req.query.address;
     const name = req.query.name;
+    const fid = req.query.fid;
 
     const networkFilter = Number(network) || null;
     const addressFilter =
@@ -140,6 +156,7 @@ export default Router()
         ? address.toLowerCase()
         : null;
     const nameFilter = typeof name === "string" && name !== "" ? name : null;
+    const fidFilter = typeof fid === "string" && fid !== "" ? fid : null;
 
     const select = container.model.contractTable().where(function () {
       if (networkFilter) {
@@ -150,6 +167,9 @@ export default Router()
       }
       if (nameFilter) {
         this.andWhere("name", "ilike", `%${nameFilter}%`);
+      }
+      if (fidFilter) {
+        this.andWhere("fid", fidFilter);
       }
     });
     if (isCount) {
@@ -163,11 +183,11 @@ export default Router()
     if (state instanceof Error) {
       return res.status(400).send(state.message);
     }
-    let { name, network, address, startHeight, abi } = state;
+    let { name, network, address, startHeight, abi, fid } = state;
 
     const contract = await container.model
       .contractService()
-      .createContract(network, address, name, abi, startHeight);
+      .createContract(network, address, name, abi, startHeight, fid);
 
     return res.json(contract);
   })
@@ -176,6 +196,13 @@ export default Router()
     [contractMiddleware],
     (req: Request<ContractReqParams>, res: Response) =>
       res.json(req.params.contract)
+  )
+  .get("/fid/:contractFid", (req, res) =>
+    container.model
+      .contractTable()
+      .where("fid", req.params.contractFid)
+      .first()
+      .then((contract) => (contract ? res.json(contract) : res.json(null)))
   )
   .delete(
     "/:contractId",
@@ -196,7 +223,7 @@ export default Router()
       if (state instanceof Error) {
         return res.status(400).send(state.message);
       }
-      const { name, network, address, startHeight, abi } = state;
+      const { name, network, address, startHeight, abi, fid } = state;
 
       const updated = await container.model.contractService().updateContract({
         ...req.params.contract,
@@ -205,6 +232,7 @@ export default Router()
         address,
         startHeight,
         abi,
+        fid,
       });
 
       return res.json(updated);

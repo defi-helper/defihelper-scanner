@@ -65,10 +65,12 @@ export class ContractService {
     address: string,
     name: string,
     abi: ethers.ContractInterface | null,
-    startHeight: number
+    startHeight: number,
+    fid: string | null
   ) {
-    const created = {
+    const created: Contract = {
       id: uuid(),
+      fid,
       network,
       address: address.toLowerCase(),
       name,
@@ -185,7 +187,10 @@ export class ContractService {
 }
 
 export class EventService {
-  constructor(readonly eventTable: Factory<EventTable>, readonly walletInteractionTable: Factory<WalletInteractionTable>) {}
+  constructor(
+    readonly eventTable: Factory<EventTable>,
+    readonly walletInteractionTable: Factory<WalletInteractionTable>
+  ) {}
 
   async create(
     eventListener: EventListener,
@@ -218,16 +223,18 @@ export class EventService {
       createdAt: dayjs.unix(timestamp).toDate(),
     };
 
-    const [ existingInteraction ] = await Promise.all([
-      this.walletInteractionTable().where({
-        wallet: from.toLowerCase(),
-        contract: event.address.toLowerCase(),
-        network
-      }).first(),
+    const [existingInteraction] = await Promise.all([
+      this.walletInteractionTable()
+        .where({
+          wallet: from.toLowerCase(),
+          contract: event.address.toLowerCase(),
+          network,
+        })
+        .first(),
       this.eventTable().insert(created),
-    ])
+    ]);
 
-    if(existingInteraction === undefined) {
+    if (existingInteraction === undefined) {
       try {
         await this.walletInteractionTable().insert({
           id: uuid(),
@@ -236,24 +243,27 @@ export class EventService {
           network,
           eventName: eventListener.name,
           createdAt: new Date(),
-        })
+        });
       } catch {
         throw new Error(
-          'Unable to create interaction: ' + [
-            from.toLowerCase(),
-            event.address.toLowerCase(),
-            network,
-            typeof existingInteraction,
-            this.walletInteractionTable().where({
-              wallet: from.toLowerCase(),
-              contract: event.address.toLowerCase(),
-              network
-            }).toQuery()
-          ].join(':')
-        )
+          "Unable to create interaction: " +
+            [
+              from.toLowerCase(),
+              event.address.toLowerCase(),
+              network,
+              typeof existingInteraction,
+              this.walletInteractionTable()
+                .where({
+                  wallet: from.toLowerCase(),
+                  contract: event.address.toLowerCase(),
+                  network,
+                })
+                .toQuery(),
+            ].join(":")
+        );
       }
     }
-    
+
     return created;
   }
 }
