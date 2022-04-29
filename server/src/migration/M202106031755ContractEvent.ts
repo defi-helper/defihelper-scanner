@@ -7,7 +7,7 @@ import {
 export default (schema: SchemaBuilder) => {
   return schema.createTable(eventTableName, (table) => {
     table.string("id", 36).notNullable();
-    table.string("eventListener", 36).notNullable();
+    table.string("eventListener", 36).notNullable().index();
     table.string("address", 42).notNullable().index();
     table.integer("blockNumber").notNullable().index();
     table.string("blockHash", 66).notNullable();

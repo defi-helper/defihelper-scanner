@@ -4,8 +4,8 @@ import { contractTableName } from "@models/Contract/Entity";
 export default (schema: SchemaBuilder) => {
   return schema.createTable(contractTableName, (table) => {
     table.string("id", 36).notNullable();
-    table.string("address", 42).notNullable();
-    table.integer("network").notNullable();
+    table.string("address", 42).notNullable().index();
+    table.integer("network").notNullable().index();
     table.string("name", 512).notNullable();
     table.jsonb("abi").nullable();
     table.integer("startHeight").notNullable();
