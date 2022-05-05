@@ -7,8 +7,8 @@ import {
 export default (schema: SchemaBuilder) => {
   return schema.createTable(eventListenerTableName, (table) => {
     table.string("id", 36).notNullable();
-    table.string("contract", 36).notNullable();
-    table.string("name", 128).notNullable();
+    table.string("contract", 36).notNullable().index();
+    table.string("name", 128).notNullable().index();
     table.integer("syncHeight").notNullable();
     table.dateTime("updatedAt").notNullable();
     table.dateTime("createdAt").notNullable();

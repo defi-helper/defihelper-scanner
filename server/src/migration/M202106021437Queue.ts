@@ -4,7 +4,7 @@ import { tableName, TaskStatus } from "@models/Queue/Entity";
 export default (schema: SchemaBuilder) => {
   return schema.createTable(tableName, (table) => {
     table.string("id", 36).notNullable();
-    table.string("handler", 512).notNullable();
+    table.string("handler", 512).notNullable().index();
     table.jsonb("params").notNullable();
     table.dateTime("startAt").notNullable();
     table

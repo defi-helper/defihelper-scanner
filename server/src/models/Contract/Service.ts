@@ -66,10 +66,12 @@ export class ContractService {
     address: string,
     name: string,
     abi: ethers.ContractInterface | null,
-    startHeight: number
+    startHeight: number,
+    fid: string | null
   ) {
-    const created = {
+    const created: Contract = {
       id: uuid(),
+      fid,
       network,
       address: address.toLowerCase(),
       name,
@@ -238,8 +240,8 @@ export class EventService {
         eventListener.name,
         new Date().toISOString(),
       ])
-    ])
-
+    ]);
+      
     return created;
   }
 }

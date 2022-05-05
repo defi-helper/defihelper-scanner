@@ -2,8 +2,9 @@ import { v4 as uuid } from "uuid";
 import { Factory } from "@services/Container";
 import { Task, TaskStatus, Table, Process, hasHandler } from "./Entity";
 import * as Handlers from "../../queue";
+import { Log } from "@services/Log";
 
-type Handler = keyof typeof Handlers;
+export type Handler = keyof typeof Handlers;
 
 export interface HandleOptions {
   include?: Handler[];
@@ -52,7 +53,7 @@ export class Broker {
 }
 
 export class QueueService {
-  constructor(readonly table: Factory<Table> = table) {}
+  constructor(readonly table: Factory<Table>, readonly log: Factory<Log>) {}
 
   async resetAndRestart(task: Task) {
     const updated = {
@@ -119,6 +120,7 @@ export class QueueService {
 
     const process = new Process(current);
     try {
+      this.log().info(`Handle task: ${current.id}`);
       const { task: result } = await Handlers[current.handler].default(process);
       await this.table().update(result).where("id", current.id);
     } catch (e) {

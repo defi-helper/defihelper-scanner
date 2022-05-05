@@ -7,34 +7,48 @@ import container from "@container";
 import dayjs from "dayjs";
 import { json } from "body-parser";
 
-const contractState = (data: any) => {
-  let { name, network, address, startHeight, abi } = data;
-  if (typeof name !== "string" || name === "") {
-    return new Error(`Invalid name "${name}"`);
+const contractState = (
+  data: any
+): {
+  name: string | Error;
+  network: number | Error;
+  address: string | Error;
+  startHeight: number | Error;
+  abi: any[] | Error;
+  fid: string | null | Error;
+} => {
+  const state: ReturnType<typeof contractState> = {
+    name: new Error("Invalid name"),
+    network: new Error("Invalid network"),
+    address: new Error("Invalid address"),
+    startHeight: new Error("Invalid start height"),
+    abi: new Error("Invalid ABI"),
+    fid: new Error("Invalid FID"),
+  };
+
+  let { name, network, address, startHeight, abi, fid } = data;
+  if (typeof name === "string" && name !== "") {
+    state.name = name;
   }
   network = parseInt(network, 10);
-  if (isNaN(network) || ![1, 56, 137, 1285, 43114].includes(network)) {
-    return new Error(`Invalid network "${network}"`);
+  if (!isNaN(network)) {
+    state.network = network;
   }
-  if (typeof address !== "string" || !/0x[a-z0-9]{40}/i.test(address)) {
-    return new Error(`Invalid address "${address}"`);
+  if (typeof address === "string" && /0x[a-z0-9]{40}/i.test(address)) {
+    state.address = address;
   }
   startHeight = parseInt(startHeight, 10);
-  if (isNaN(startHeight) || startHeight < 0) {
-    return new Error(`Invalid start height "${startHeight}"`);
+  if (!isNaN(startHeight)) {
+    state.startHeight = startHeight;
   }
-  if (typeof abi !== "string") {
-    return new Error(`Invalid abi "${JSON.stringify(abi, null, 4)}"`);
+  if (typeof abi === "string") {
+    state.abi = abi !== "" ? JSON.parse(abi) : null;
   }
-  abi = abi !== "" ? JSON.parse(abi) : null;
+  if (typeof fid === "string") {
+    state.fid = fid !== "" ? fid : null;
+  }
 
-  return {
-    name,
-    network,
-    address: address.toLowerCase(),
-    startHeight,
-    abi,
-  };
+  return state;
 };
 
 const eventListenerState = (data: any) => {
@@ -159,15 +173,31 @@ export default Router()
     return res.json(await select.limit(limit).offset(offset));
   })
   .post("/", json(), async (req, res) => {
-    const state = contractState(req.body);
-    if (state instanceof Error) {
-      return res.status(400).send(state.message);
+    const { name, network, address, startHeight, abi, fid } = contractState(
+      req.body
+    );
+    if (name instanceof Error) {
+      return res.status(400).send(name.message);
     }
-    let { name, network, address, startHeight, abi } = state;
+    if (network instanceof Error) {
+      return res.status(400).send(network.message);
+    }
+    if (address instanceof Error) {
+      return res.status(400).send(address.message);
+    }
+    if (startHeight instanceof Error) {
+      return res.status(400).send(startHeight.message);
+    }
+    if (abi instanceof Error) {
+      return res.status(400).send(abi.message);
+    }
+    if (fid instanceof Error) {
+      return res.status(400).send(fid.message);
+    }
 
     const contract = await container.model
       .contractService()
-      .createContract(network, address, name, abi, startHeight);
+      .createContract(network, address, name, abi, startHeight, fid);
 
     return res.json(contract);
   })
@@ -176,6 +206,17 @@ export default Router()
     [contractMiddleware],
     (req: Request<ContractReqParams>, res: Response) =>
       res.json(req.params.contract)
+  )
+  .get("/fid/:contractFid", (req, res) =>
+    container.model
+      .contractTable()
+      .where("fid", req.params.contractFid)
+      .first()
+      .then((contract) =>
+        contract
+          ? res.json(contract)
+          : res.status(404).send("Contract not found")
+      )
   )
   .delete(
     "/:contractId",
@@ -192,19 +233,20 @@ export default Router()
     "/:contractId",
     [json(), contractMiddleware],
     async (req: Request<ContractReqParams>, res: Response) => {
-      const state = contractState(req.body);
-      if (state instanceof Error) {
-        return res.status(400).send(state.message);
-      }
-      const { name, network, address, startHeight, abi } = state;
+      const contract = req.params.contract;
+      const { name, network, address, startHeight, abi, fid } = contractState(
+        req.body
+      );
 
       const updated = await container.model.contractService().updateContract({
-        ...req.params.contract,
-        name,
-        network,
-        address,
-        startHeight,
-        abi,
+        ...contract,
+        name: name instanceof Error ? contract.name : name,
+        network: network instanceof Error ? contract.network : network,
+        address: address instanceof Error ? contract.address : address,
+        startHeight:
+          startHeight instanceof Error ? contract.startHeight : startHeight,
+        abi: abi instanceof Error ? contract.abi : abi,
+        fid: fid instanceof Error ? contract.fid : fid,
       });
 
       return res.json(updated);

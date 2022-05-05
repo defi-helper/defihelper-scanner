@@ -5,7 +5,7 @@ import { eventListenerTableName } from "@models/Contract/Entity";
 export default (schema: SchemaBuilder) => {
   return schema.createTable(callBackTableName, (table) => {
     table.string("id", 36).notNullable();
-    table.string("eventListener", 36).notNullable();
+    table.string("eventListener", 36).notNullable().index();
     table.string("callbackUrl").notNullable();
     table.dateTime("createdAt").notNullable();
     table.primary(["id"], `${callBackTableName}_pkey`);
