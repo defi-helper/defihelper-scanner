@@ -15,6 +15,7 @@ container.model
   .migrationService()
   .up()
   .then(async () => -{
+    
     const express = Express();
     express.use(Express.static(resolve(__dirname, "../../public")));
     route(express);
