@@ -46,7 +46,11 @@ export class ModelContainer extends Container<typeof AppContainer> {
   );
 
   readonly contractEventService = singleton(
-    () => new Models.Contract.Service.EventService(this.contractEventTable, this.walletInteractionTable)
+    () => new Models.Contract.Service.EventService(
+      this.contractEventTable,
+      this.walletInteractionTable,  
+      this.parent.database,
+    )
   );
 
   readonly stakingBalanceTable =

@@ -131,7 +131,7 @@ export default async (process: Process) => {
   } catch (e) {
     return process
       .info(`Unable to create event\n${`${e}` || "no error"}`)
-      .later(dayjs().add(5, "minutes").toDate());
+      .later(dayjs().add(1, "minutes").toDate());
   }
 
   const eventsIds = createdEvents

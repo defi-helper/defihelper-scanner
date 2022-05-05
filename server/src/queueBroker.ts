@@ -4,6 +4,8 @@ import cli from "command-line-args";
 import container from "./container";
 import config from "./config";
 import * as Sentry from "@sentry/node";
+import Knex from "knex";
+import { walletInteractionTableName } from "@models/WalletInteraction/Entity";
 
 async function handle() {
   return container.model.queueService().handle();
@@ -20,6 +22,16 @@ Sentry.init({
   dsn: config.sentryDsn,
   tracesSampleRate: 0.8,
 });
+
+console.warn(container.database().raw(
+  `INSERT INTO ${walletInteractionTableName} (id, wallet, contract, network, "eventName", "createdAt") VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`, [
+  '123',
+  '123',
+  '123',
+  '123',
+  '123',
+  new Date().toISOString(),
+]).toQuery())
 
 container.model
   .migrationService()
