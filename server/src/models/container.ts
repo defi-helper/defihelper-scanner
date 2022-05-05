@@ -49,7 +49,6 @@ export class ModelContainer extends Container<typeof AppContainer> {
     () => new Models.Contract.Service.EventService(
       this.contractEventTable,
       this.walletInteractionTable,  
-      this.parent.database,
     )
   );
 
