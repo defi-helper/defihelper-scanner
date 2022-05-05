@@ -11,7 +11,8 @@
     "website-watch": "webpack --config ./website/webpack.config.ts --watch",
     "start": "node ./server/dist",
     "queue": "node ./server/dist/queueBroker.js",
-    "tool": "node ./server/dist/runTools.js"
+    "tool": "node ./server/dist/runTools.js",
+    "prepare": "husky install"
   },
   "lint-staged": {
     "./src/**/*.ts": [
