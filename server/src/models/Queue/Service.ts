@@ -71,16 +71,19 @@ export class QueueService {
   async push<H extends Handler>(
     handler: H,
     params: Object,
-    startAt: Date = new Date()
+    timeout: number|null = null,
+    startAt: Date = new Date(),
   ) {
     const task: Task = {
       id: uuid(),
       handler,
       params,
       startAt,
+      timeout,
       status: TaskStatus.Pending,
       info: "",
       error: "",
+      retries: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -112,6 +115,7 @@ export class QueueService {
 
     const lock = await this.table()
       .update({ status: TaskStatus.Process })
+      .increment('retries')
       .where({
         id: current.id,
         status: TaskStatus.Pending,
