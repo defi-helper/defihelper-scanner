@@ -51,6 +51,7 @@ export async function main() {
     await queueService.push(
       "stakingBalanceOf",
       { id: stakingBalance.id },
+      900, //15 minutes
       dayjs().add(i, "seconds").toDate()
     );
     i++;
