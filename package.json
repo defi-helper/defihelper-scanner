@@ -11,18 +11,12 @@
     "website-watch": "webpack --config ./website/webpack.config.ts --watch",
     "start": "node ./server/dist",
     "queue": "node ./server/dist/queueBroker.js",
-    "tool": "node ./server/dist/runTools.js",
-    "prepare": "husky install"
+    "tool": "node ./server/dist/runTools.js"
   },
   "lint-staged": {
     "./src/**/*.ts": [
       "eslint --ignore-path .gitignore --fix"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint"
-    }
   },
   "author": "Bond Appetit",
   "license": "MIT",
