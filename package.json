@@ -18,6 +18,11 @@
       "eslint --ignore-path .gitignore --fix"
     ]
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
+  },
   "author": "Bond Appetit",
   "license": "MIT",
   "dependencies": {
