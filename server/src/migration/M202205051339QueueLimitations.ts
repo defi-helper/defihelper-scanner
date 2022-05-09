@@ -4,7 +4,7 @@ import { SchemaBuilder } from "knex";
  export default (schema: SchemaBuilder) => {
    return schema.alterTable(queueTableName, (table) => {
      table.integer("timeout", 6).nullable();
-     table.integer("retires", 3).defaultTo(0).notNullable();
+     table.integer("retries", 3).defaultTo(0).notNullable();
    });
  };
  
