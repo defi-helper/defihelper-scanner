@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+replicaCount: 2
 
 images:
   nginx:
@@ -34,14 +34,14 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-production"
   hosts:
-    - host: scanner-dev.defihelper.info
+    - host: scanner.defihelper.io
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
     - secretName: scanner-tls
       hosts:
-        - scanner-dev.defihelper.info
+        - scanner.defihelper.io
 
 autoscaling:
   enabled: false
