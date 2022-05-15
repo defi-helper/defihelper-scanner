@@ -43,6 +43,28 @@ ingress:
       hosts:
         - scanner-dev.defihelper.info
 
+broker:
+  maxReplicas: 2
+  maxReadyMessagesForHpa: 25
+  process:
+    labels:
+      app: app
+      component: broker
+      environment: dev
+      queue: process
+    queues:
+      queue:
+        name: queue
+        command: '"npm", "run", "queue"'
+        replicas: 1
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 200m
+          limits:
+            memory: 384Mi
+            cpu: 300m
+
 autoscaling:
   enabled: false
   minReplicas: 1
