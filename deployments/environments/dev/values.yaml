@@ -57,6 +57,7 @@ broker:
         name: queue
         command: '"npm", "run", "queue"'
         replicas: 1
+        fullnameOverride: ""
         resources:
           requests:
             memory: 256Mi
