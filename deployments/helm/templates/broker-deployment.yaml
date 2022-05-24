@@ -1,3 +1,5 @@
+{{- $images := .Values.images -}}
+
 {{- range $queue, $params := .Values.broker.process.queues }}
 apiVersion: apps/v1
 kind: Deployment
@@ -34,7 +36,7 @@ spec:
       containers:
       - name: app
         imagePullPolicy: Always
-        image: "{{ $.Values.image.repository }}/{{ .Values.images.app.name }}:{{ $.Values.image.tag }}"
+        image: "{{ $.Values.image.repository }}/{{ $images.app.name }}:{{ $.Values.image.tag }}"
         securityContext:
           { { - toYaml .Values.securityContext | nindent 12 } }
         lifecycle:
