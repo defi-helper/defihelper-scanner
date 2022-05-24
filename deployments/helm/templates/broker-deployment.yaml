@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: '{{ include "website.fullname" . }}-broker-{{ $params.name }}'
+  name: 'scanner-broker-{{ $params.name }}'
   labels:
   {{- range $key, $value := $.Values.broker.process.labels }}
     {{ $key }}: {{ $value }}
