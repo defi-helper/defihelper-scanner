@@ -24,7 +24,6 @@ export default async (process: Process) => {
     const interaction = await container.model
       .walletInteractionTable()
       .where({
-        eventName: listener.name,
         network: event.network,
         contract: event.address.toLowerCase(),
         wallet: event.from.toLowerCase(),
