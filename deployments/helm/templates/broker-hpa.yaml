@@ -7,14 +7,14 @@ metadata:
     {{ $key }}: {{ $value }}
   {{- end }}
     release: {{ $.Release.Name }}
-  name: '{{ include "website.fullname" . }}-broker-{{ $params.name }}-hpa'
+  name: 'scanner-broker-{{ $params.name }}-hpa'
 spec:
   maxReplicas: {{ $.Values.broker.maxReplicas }}
   metrics:
   - type: Object
     object:
       metric:
-        name: 'rabbitmq_{{ include "website.fullname" . }}_{{ $queue }}_messages_ready'
+        name: 'rabbitmq_scanner_{{ $queue }}_messages_ready'
       describedObject:
         apiVersion: v1
         kind: Service
@@ -32,6 +32,6 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: '{{ include "website.fullname" . }}-broker-{{ $params.name }}'
+    name: 'scanner-broker-{{ $params.name }}'
 ---
 {{- end }}
