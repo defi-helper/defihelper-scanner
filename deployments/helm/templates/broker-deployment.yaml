@@ -37,8 +37,6 @@ spec:
       - name: app
         imagePullPolicy: Always
         image: "{{ $.Values.image.repository }}/{{ $images.app.name }}:{{ $.Values.image.tag }}"
-        securityContext:
-          { { - toYaml .Values.securityContext | nindent 12 } }
         lifecycle:
           preStop:
             exec:
