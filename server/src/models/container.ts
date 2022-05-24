@@ -52,13 +52,6 @@ export class ModelContainer extends Container<typeof AppContainer> {
     )
   );
 
-  readonly stakingBalanceTable =
-    Models.Staking.Entity.stakingBalanceTableFactory(this.parent.database);
-
-  readonly stakingBalanceService = singleton(
-    () => new Models.Staking.Service.StakingService(this.stakingBalanceTable)
-  );
-
   readonly callBackTable = Models.Callback.Entity.callBackTableFactory(
     this.parent.database
   );
