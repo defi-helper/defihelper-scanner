@@ -55,7 +55,6 @@ broker:
     queues:
       queue:
         name: queue
-        CMD [ ]
         command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue"'
         replicas: 1
         resources:
