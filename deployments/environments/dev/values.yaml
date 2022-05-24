@@ -62,8 +62,8 @@ broker:
             memory: 256Mi
             cpu: 200m
           limits:
-            memory: 384Mi
-            cpu: 300m
+            memory: 512Mi
+            cpu: 500m
 
 autoscaling:
   enabled: false
