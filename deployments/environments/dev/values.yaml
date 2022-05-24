@@ -46,20 +46,17 @@ ingress:
 broker:
   maxReplicas: 2
   maxReadyMessagesForHpa: 25
-  fullnameOverride: ""
   process:
     labels:
       app: app
       component: broker
       environment: dev
       queue: process
-      fullnameOverride: ""
     queues:
       queue:
         name: queue
         command: '"npm", "run", "queue"'
         replicas: 1
-        fullnameOverride: ""
         resources:
           requests:
             memory: 256Mi
