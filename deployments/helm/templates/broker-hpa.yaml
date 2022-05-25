@@ -8,14 +8,14 @@ metadata:
     {{ $key }}: {{ $value }}
   {{- end }}
     release: {{ $.Release.Name }}
-  name: 'scanner-broker-{{ $params.name }}-hpa'
+  name: '{{ $.Release.Name }}-broker-{{ $params.name }}-hpa'
 spec:
   maxReplicas: {{ $.Values.broker.maxReplicas }}
   metrics:
   - type: Object
     object:
       metric:
-        name: 'rabbitmq_scanner_{{ $queue }}_messages_ready'
+        name: 'rabbitmq_{{ $.Release.Name }}_{{ $queue }}_messages_ready'
       describedObject:
         apiVersion: v1
         kind: Service
@@ -33,7 +33,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: 'scanner-broker-{{ $params.name }}'
+    name: '{{ $.Release.Name }}-broker-{{ $params.name }}'
 ---
 {{- end }}
 {{- end }}
