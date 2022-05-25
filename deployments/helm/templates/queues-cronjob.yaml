@@ -27,15 +27,15 @@ spec:
           containers:
           - name: handlers-{{ $queue }}
             env:
-            - name: ENV
-              value: mnt_configuration/{{ $.Values.environment }}
+              - name: ENV
+                value: mnt_configuration/{{ $.Values.environment }}
             image: {{ $.Values.images.prefix }}/{{ $.Values.images.app.name }}:{{ $.Values.images.tag }}
             command: [{{ $params.command }}]
             imagePullPolicy: Always
             volumeMounts:
-            - mountPath: /app/configuration
-              name: configuration
-              readOnly: true
+              - mountPath: /app/configuration
+                name: configuration
+                readOnly: true
           volumes:
             - name: configuration
               secret:
