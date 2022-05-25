@@ -1,6 +1,6 @@
-{{- if .Values.broker }}
-  {{- $images := .Values.images -}}
+{{- $images := .Values.images -}}
 
+{{- if .Values.broker }}
   {{- range $queue, $params := .Values.broker.process.queues }}
   apiVersion: apps/v1
   kind: Deployment
