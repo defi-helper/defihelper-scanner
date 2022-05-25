@@ -65,6 +65,23 @@ broker:
             memory: 512Mi
             cpu: 500m
 
+handlers:
+  labels:
+    app: scanner
+    component: cronHandler
+    environment: dev
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 200m
+    limits:
+      memory: 256Mi
+      cpu: 300m
+  schedules:
+    hour:
+      command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run tool stuckInProcessTasksRestarter"'
+      schedule: "0 * * * *"
+
 autoscaling:
   enabled: false
   minReplicas: 1
