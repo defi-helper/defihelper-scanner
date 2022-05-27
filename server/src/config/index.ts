@@ -11,6 +11,17 @@ export default {
     database: process.env.DATABASE_NAME ?? "",
     ssl: process.env.DATABASE_SSL ?? "",
   },
+  rabbitmq: {
+    host: process.env.RABBITMQ_HOST ?? 'amqp://localhost:5672',
+    options: {
+      prefetch: parseInt(process.env.RABBITMQ_PREFETCH ?? '1', 10),
+      replyPattern: Boolean(process.env.RABBITMQ_REPLY ?? ''),
+      scheduledPublish: Boolean(process.env.RABBITMQ_SCHEDULED_PUBLISH ?? ''),
+    },
+    queues: [
+      { name: 'tasks_default', topic: 'tasks.*.default' },
+    ],
+  },
   blockchain: {
     ethMainNode: process.env.ETH_NODE ?? "",
     bscMainNode: process.env.BSC_NODE ?? "",

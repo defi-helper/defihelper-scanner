@@ -59,6 +59,8 @@ export interface Task {
   status: TaskStatus;
   info: string;
   error: string;
+  priority: number;
+  topic: string;
   timeout: number|null;
   retries: number;
   updatedAt: Date;

@@ -10,8 +10,10 @@
     "website-build": "webpack --config ./website/webpack.config.ts",
     "website-watch": "webpack --config ./website/webpack.config.ts --watch",
     "start": "node ./server/dist",
-    "queue": "node ./server/dist/queueBroker.js",
-    "tool": "node ./server/dist/runTools.js"
+    "tool": "node ./server/dist/runTools.js",
+    "queue-consume": "node ./server/dist/queueConsume.js",
+    "queue-deferred": "node ./server/dist/queueDeferred.js",
+    "queue-broker": "node ./server/dist/queueBroker.js"
   },
   "lint-staged": {
     "./src/**/*.ts": [
@@ -69,6 +71,7 @@
     "pg": "^8.5.1",
     "prettier": "^2.2.1",
     "pretty-js": "^0.2.1",
+    "rabbit-queue": "^5.4.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "source-map-support": "^0.5.21",
@@ -86,5 +89,8 @@
     "@services": "server/dist/services",
     "@models": "server/dist/models",
     "@api": "server/dist/api"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.8.2"
   }
 }
