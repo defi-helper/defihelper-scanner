@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid";
 import { Factory } from "@services/Container";
 import { Task, TaskStatus, Table, Process, hasHandler } from "./Entity";
 import * as Handlers from "../../queue";
-import { consoleFactory, Log } from "@services/Log";
+import { Log } from "@services/Log";
 import { Rabbit } from 'rabbit-queue';
 import dayjs from "dayjs";
 
@@ -75,7 +75,7 @@ export class QueueService {
         status: TaskStatus.Process,
       });
       await this.rabbitmq()
-        .publishTopic(`tasks.${task.handler}.${task.topic}`, task, {
+        .publishTopic(`scanner.tasks.${task.handler}.${task.topic}`, task, {
           priority: task.priority,
         })
         .catch(() =>
@@ -135,7 +135,7 @@ export class QueueService {
         const isLocked = await this.lock(task);
         if (!isLocked) return;
 
-        await this.rabbitmq().publishTopic(`tasks.${task.handler}.${task.topic}`, task, {
+        await this.rabbitmq().publishTopic(`scanner.tasks.${task.handler}.${task.topic}`, task, {
           priority: task.priority,
         });
       }),
@@ -152,7 +152,7 @@ export class QueueService {
 
   consume({ queue }: ConsumerOptions) {
     this.rabbitmq().createQueue(
-      queue ?? 'tasks_default',
+      queue ?? 'scanner_tasks_default',
       { durable: false },
       this.consumer.bind(this),
     );
