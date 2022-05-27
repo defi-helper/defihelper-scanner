@@ -19,7 +19,7 @@ export default {
       scheduledPublish: Boolean(process.env.RABBITMQ_SCHEDULED_PUBLISH ?? ''),
     },
     queues: [
-      { name: 'tasks_default', topic: 'tasks.*.default' },
+      { name: 'scanner_tasks_default', topic: 'tasks.*.default' },
     ],
   },
   blockchain: {
