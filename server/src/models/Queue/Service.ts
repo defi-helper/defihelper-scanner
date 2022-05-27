@@ -3,6 +3,8 @@ import { Factory } from "@services/Container";
 import { Task, TaskStatus, Table, Process, hasHandler } from "./Entity";
 import * as Handlers from "../../queue";
 import { Log } from "@services/Log";
+import { Rabbit } from 'rabbit-queue';
+import dayjs from "dayjs";
 
 export type Handler = keyof typeof Handlers;
 
@@ -16,44 +18,19 @@ export interface BrokerOptions {
   handler: HandleOptions;
 }
 
-export class Broker {
-  protected isStarted: boolean = false;
-
-  constructor(
-    readonly service: QueueService = service,
-    readonly options: Partial<BrokerOptions> = {}
-  ) {
-    this.options = {
-      interval: 1000,
-      ...options,
-    };
-  }
-
-  protected async handle() {
-    if (!this.isStarted) return;
-
-    const res = await this.service.handle(this.options.handler);
-    if (!res) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, this.options.interval);
-      });
-    }
-
-    this.handle();
-  }
-
-  start() {
-    this.isStarted = true;
-    this.handle();
-  }
-
-  stop() {
-    this.isStarted = false;
-  }
+export interface ConsumerOptions {
+  queue?: string;
 }
 
 export class QueueService {
-  constructor(readonly table: Factory<Table>, readonly log: Factory<Log>) {}
+  static readonly defaultPriority = 4; // min - 0, max - 9
+  static readonly defaultTopic = 'default';
+
+  constructor(
+    readonly table: Factory<Table>,
+    readonly rabbitmq: Factory<Rabbit>,
+    readonly log: Factory<Log>
+  ) {}
 
   async resetAndRestart(task: Task) {
     const updated = {
@@ -73,6 +50,8 @@ export class QueueService {
     params: Object,
     timeout: number|null = null,
     startAt: Date = new Date(),
+    priority?: number,
+    topic?: string,
   ) {
     const task: Task = {
       id: uuid(),
@@ -80,6 +59,8 @@ export class QueueService {
       params,
       startAt,
       timeout,
+      topic: topic ?? QueueService.defaultTopic,
+      priority: priority ?? QueueService.defaultPriority,
       status: TaskStatus.Pending,
       info: "",
       error: "",
@@ -88,56 +69,91 @@ export class QueueService {
       updatedAt: new Date(),
     };
 
-    await this.table().insert(task);
+    if (!dayjs(task.startAt).isAfter(new Date())) {
+      await this.table().insert({
+        ...task,
+        status: TaskStatus.Process,
+      });
+      await this.rabbitmq()
+        .publishTopic(`tasks.${task.handler}.${task.topic}`, task, {
+          priority: task.priority,
+        })
+        .catch(() =>
+          this.table()
+            .update({
+              ...task,
+              status: TaskStatus.Pending,
+            })
+            .where('id', task.id),
+        );
+      return task;
+    }
 
+    await this.table().insert(task);
     return task;
   }
 
-  async handle(options: HandleOptions = {}): Promise<boolean> {
-    const current = await this.table()
-      .where(function () {
-        this.where("status", TaskStatus.Pending).andWhere(
-          "startAt",
-          "<=",
-          new Date()
-        );
-        if (options.include && options.include.length > 0) {
-          this.whereIn("handler", options.include);
-        }
-        if (options.exclude && options.exclude.length > 0) {
-          this.whereNotIn("handler", options.exclude);
-        }
-      })
-      .orderBy("startAt", "asc")
-      .limit(1)
-      .first();
-    if (!current) return false;
-
-    const lock = await this.table()
-      .update({ status: TaskStatus.Process })
-      .increment('retries')
-      .where({
-        id: current.id,
-        status: TaskStatus.Pending,
-      });
-    if (lock === 0) return false;
-
-    const process = new Process(current);
+  async handle(task: Task) {
+    const process = new Process(task);
     try {
-      this.log().info(`Handle task: ${current.id}`);
-      const { task: result } = await Handlers[current.handler].default(process);
-      await this.table().update(result).where("id", current.id);
+      const { task: result } = await Handlers[task.handler].default(process);
+      return await this.table().update(result).where('id', task.id);
     } catch (e) {
-      await this.table().update(process.error(e).task).where("id", current.id);
+      const error = e instanceof Error ? e : new Error(`${e}`);
+
+      return Promise.all([
+        this.table().update(process.error(error).task).where('id', task.id),
+        this.log().info(`queue:${task.handler}, ${task.id} ${error.stack ?? error}`),
+      ]);
     }
+  }
+
+  async getCandidates(limit: number) {
+    return this.table()
+      .where('status', TaskStatus.Pending)
+      .andWhere('startAt', '<=', new Date())
+      .orderBy('startAt', 'asc')
+      .orderBy('priority', 'desc')
+      .limit(limit);
+  }
+
+  async lock({ id }: Task) {
+    const lock = await this.table().update({ status: TaskStatus.Process }).where({
+      id,
+      status: TaskStatus.Pending,
+    });
+    if (lock === 0) return false;
 
     return true;
   }
 
-  createBroker(options: Partial<BrokerOptions> = {}) {
-    if (typeof options.handler === "string" && !hasHandler(options.handler)) {
-      throw new Error(`Invalid queue handler "${options.handler}"`);
-    }
-    return new Broker(this, options);
+  async deferred(limit: number) {
+    const candidates = await this.getCandidates(limit);
+
+    await Promise.all(
+      candidates.map(async (task) => {
+        const isLocked = await this.lock(task);
+        if (!isLocked) return;
+
+        await this.rabbitmq().publishTopic(`tasks.${task.handler}.${task.topic}`, task, {
+          priority: task.priority,
+        });
+      }),
+    );
+  }
+
+  async consumer(msg: any, ack: (error?: any, reply?: any) => any) {
+    const task: Task = JSON.parse(msg.content.toString());
+    this.log().info(`Handle task: ${task.id}`);
+    await this.handle(task);
+    ack();
+  }
+
+  consume({ queue }: ConsumerOptions) {
+    this.rabbitmq().createQueue(
+      queue ?? 'tasks_default',
+      { durable: false },
+      this.consumer.bind(this),
+    );
   }
 }

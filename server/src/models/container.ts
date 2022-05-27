@@ -20,7 +20,11 @@ export class ModelContainer extends Container<typeof AppContainer> {
   readonly queueTable = Models.Queue.Entity.tableFactory(this.parent.database);
 
   readonly queueService = singleton(
-    () => new Models.Queue.Service.QueueService(this.queueTable, this.parent.logger)
+    () => new Models.Queue.Service.QueueService(
+      this.queueTable, 
+      this.parent.rabbitmq,
+      this.parent.logger
+    )
   );
 
   readonly walletInteractionTable = Models.WalletInteraction.Entity.walletInteractionTableFactory(this.parent.database);
