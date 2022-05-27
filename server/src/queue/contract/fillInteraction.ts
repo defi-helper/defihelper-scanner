@@ -18,18 +18,8 @@ export default async (process: Process) => {
   const events = await container.model
     .contractEventTable()
     .where("eventListener", listener.id);
-  await events.reduce(async (prev, event) => {
+  await events.reduce<Promise<unknown>>(async (prev, event) => {
     await prev;
-
-    const interaction = await container.model
-      .walletInteractionTable()
-      .where({
-        network: event.network,
-        contract: event.address.toLowerCase(),
-        wallet: event.from.toLowerCase(),
-      })
-      .first();
-    if (interaction) return null;
 
     return container.model.walletInteractionTable().insert({
       id: uuid(),
@@ -38,7 +28,9 @@ export default async (process: Process) => {
       network: event.network,
       eventName: listener.name,
       createdAt: new Date(),
-    });
+    })
+    .onConflict([ 'wallet', 'contract', 'network',])
+    .ignore();
   }, Promise.resolve(null));
 
   return process.done();
