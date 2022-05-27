@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid";
 import { Factory } from "@services/Container";
 import { Task, TaskStatus, Table, Process, hasHandler } from "./Entity";
 import * as Handlers from "../../queue";
-import { Log } from "@services/Log";
+import { consoleFactory, Log } from "@services/Log";
 import { Rabbit } from 'rabbit-queue';
 import dayjs from "dayjs";
 
@@ -145,6 +145,7 @@ export class QueueService {
   async consumer(msg: any, ack: (error?: any, reply?: any) => any) {
     const task: Task = JSON.parse(msg.content.toString());
     this.log().info(`Handle task: ${task.id}`);
+    console.warn(task)
     await this.handle(task);
     ack();
   }

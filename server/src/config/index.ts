@@ -20,8 +20,6 @@ export default {
     },
     queues: [
       { name: 'tasks_default', topic: 'tasks.*.default' },
-      { name: 'tasks_metricHistory', topic: 'tasks.*.metricHistory' },
-      { name: 'tasks_metricCurrent', topic: 'tasks.*.metricCurrent' },
     ],
   },
   blockchain: {
