@@ -24,30 +24,30 @@ spec:
           annotations:
             "sidecar.istio.io/inject": "false"
         spec:
-          containers:
-          - name: handlers-{{ $queue }}
-            image: {{ $.Values.images.prefix }}/{{ $.Values.images.app.name }}:{{ $.Values.images.tag }}
-            command: [{{ $params.command }}]
-            imagePullPolicy: Always
-            volumeMounts:
-              - mountPath: /app/configuration
-                name: configuration
-                readOnly: true
-          volumes:
-            - name: configuration
-              secret:
-                secretName: config-secrets
-          restartPolicy: Never
-          imagePullSecrets:
-            - name: docker-registry-secret
-          nodeSelector:
-          {{- range $key, $value := $.Values.handlers.nodeSelector }}
-            {{ $key }}: {{ $value }}
-          {{- end }}
-          {{- with $.Values.handlers.tolerations }}
-          tolerations:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+        containers:
+        - name: handlers-{{ $queue }}
+          image: {{ $.Values.images.prefix }}/{{ $.Values.images.app.name }}:{{ $.Values.images.tag }}
+          command: [{{ $params.command }}]
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /app/configuration
+              name: configuration
+              readOnly: true
+        volumes:
+          - name: configuration
+            secret:
+              secretName: config-secrets
+        restartPolicy: Never
+        imagePullSecrets:
+          - name: docker-registry-secret
+        nodeSelector:
+        {{- range $key, $value := $.Values.handlers.nodeSelector }}
+          {{ $key }}: {{ $value }}
+        {{- end }}
+        {{- with $.Values.handlers.tolerations }}
+        tolerations:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
   schedule: {{ $params.schedule | quote }}
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
