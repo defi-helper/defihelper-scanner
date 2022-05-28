@@ -8,7 +8,7 @@ container.model
   .up()
   .then(async () => {
     const options = cli([
-      { name: 'limit', alias: 'l', type: Number, defaultValue: 10 },
+      { name: 'limit', alias: 'l', type: Number, defaultValue: 1000 },
     ]);
 
     container.rabbitmq().on('disconnected', () => {

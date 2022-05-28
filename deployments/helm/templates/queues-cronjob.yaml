@@ -3,7 +3,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: at-{{ $.Release.Name }}-handlers-{{ $queue }}
+  name: {{ $.Release.Name }}-handlers-{{ $queue }}
   labels:
   {{- range $key, $value := $.Values.handlers.labels }}
     {{ $key }}: {{ $value }}
