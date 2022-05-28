@@ -21,6 +21,8 @@ container.model
       .info(
         `Publish deferred "${options.limit}" queue tasks`,
       );
+
+    process.exit(0);
   })
   .catch((e) => {
     container.logger().error(e);
