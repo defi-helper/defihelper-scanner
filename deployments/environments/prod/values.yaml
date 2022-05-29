@@ -56,6 +56,11 @@ broker:
       queue:
         name: queue
         command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-consume -- -q scanner_tasks_default"'
+        tolerations:
+          - key: node-role.kubernetes.io/apps-jobs
+            operator: "Equal"
+            value: "true"
+            effect: NoSchedule
         replicas: 4
         resources:
           requests:
@@ -66,6 +71,8 @@ broker:
             cpu: 800m
 
 handlers:
+  nodeSelector:
+    group_name: "apps-jobs"
   labels:
     app: scanner
     component: cronHandler
@@ -77,6 +84,11 @@ handlers:
     limits:
       memory: 256Mi
       cpu: 300m
+  tolerations:
+    - key: node-role.kubernetes.io/apps-jobs
+      operator: "Equal"
+      value: "true"
+      effect: NoSchedule
   schedules:
     queue-deferred:
       command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-deferred"'
@@ -91,8 +103,13 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
-nodeSelector: {}
-tolerations: []
+nodeSelector:
+  group_name: "apps-web"
+tolerations:
+  - key: node-role.kubernetes.io/apps-web
+    operator: "Equal"
+    value: "true"
+    effect: NoSchedule
 affinity: {}
 nameOverride: ""
 fullnameOverride: ""
