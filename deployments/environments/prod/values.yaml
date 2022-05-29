@@ -56,13 +56,13 @@ broker:
       queue:
         name: queue
         command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-consume -- -q scanner_tasks_default"'
-        replicas: 5
+        replicas: 4
         resources:
           requests:
-            memory: 512Mi
-            cpu: 300m
-          limits:
             memory: 1024Mi
+            cpu: 500m
+          limits:
+            memory: 2048Mi
             cpu: 800m
 
 handlers:
