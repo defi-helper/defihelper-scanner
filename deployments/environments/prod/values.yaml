@@ -45,7 +45,7 @@ ingress:
 
 broker:
   maxReplicas: 10
-  maxReadyMessagesForHpa: 25
+  maxReadyMessagesForHpa: 200
   process:
     labels:
       app: app
@@ -56,7 +56,7 @@ broker:
       queue:
         name: queue
         command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-consume -- -q scanner_tasks_default"'
-        replicas: 4
+        replicas: 1
         resources:
           requests:
             memory: 1024Mi
