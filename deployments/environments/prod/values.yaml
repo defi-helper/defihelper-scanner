@@ -56,6 +56,8 @@ broker:
       queue:
         name: queue
         command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-consume -- -q scanner_tasks_default"'
+        nodeSelector:
+          group_name: "apps-jobs"
         tolerations:
           - key: node-role.kubernetes.io/apps-jobs
             operator: "Equal"
@@ -93,9 +95,9 @@ handlers:
     queue-deferred:
       command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-deferred"'
       schedule: "* * * * *"
-    hour:
-      command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run tool stuckInProcessTasksRestarter"'
-      schedule: "0 * * * *"
+#    hour:
+#      command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run tool stuckInProcessTasksRestarter"'
+#      schedule: "0 * * * *"
 
 autoscaling:
   enabled: true
