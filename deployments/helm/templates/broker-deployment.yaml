@@ -54,7 +54,7 @@ spec:
           secret:
             secretName: config-secrets
       nodeSelector:
-      {{- range $key, $value := $.Values.nodeSelector }}
+      {{- range $key, $value := $params.nodeSelector }}
         {{ $key }}: {{ $value }}
       {{- end }}
       {{- if $params.graceperiod }}
