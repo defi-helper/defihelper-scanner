@@ -48,27 +48,21 @@ export default async (process: Process) => {
     .orderBy("id")
     .limit(PACK_SIZE)
     .offset(offset);
-  await events.reduce(async (prev, event) => {
+  await events.reduce<Promise<null>>(async (prev, event) => {
     await prev;
-
-    const interaction = await container.model
+    await container.model
       .walletInteractionTable()
-      .where({
-        network: event.network,
-        contract: event.address.toLowerCase(),
+      .insert({
+        id: uuid(),
         wallet: event.from.toLowerCase(),
+        contract: event.address.toLowerCase(),
+        network: event.network,
+        eventName: listener.name,
+        createdAt: new Date(),
       })
-      .first();
-    if (interaction) return null;
-
-    return container.model.walletInteractionTable().insert({
-      id: uuid(),
-      wallet: event.from.toLowerCase(),
-      contract: event.address.toLowerCase(),
-      network: event.network,
-      eventName: listener.name,
-      createdAt: new Date(),
-    });
+      .onConflict(["wallet", "contract", "network"])
+      .ignore();
+    return null;
   }, Promise.resolve(null));
 
   return process.done();

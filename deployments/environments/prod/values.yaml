@@ -43,14 +43,75 @@ ingress:
       hosts:
         - scanner.defihelper.io
 
+broker:
+  maxReplicas: 10
+  maxReadyMessagesForHpa: 200
+  process:
+    labels:
+      app: app
+      component: broker
+      environment: prod
+      queue: process
+    queues:
+      queue:
+        name: queue
+        command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-consume -- -q scanner_tasks_default"'
+        replicas: 1
+        resources:
+          requests:
+            memory: 1024Mi
+            cpu: 500m
+          limits:
+            memory: 2048Mi
+            cpu: 800m
+        nodeSelector:
+          group_name: "apps-jobs"
+        tolerations:
+          - key: node-role.kubernetes.io/apps-jobs
+            operator: "Equal"
+            value: "true"
+            effect: NoSchedule
+
+handlers:
+  nodeSelector:
+    group_name: "apps-jobs"
+  tolerations:
+    - key: node-role.kubernetes.io/apps-jobs
+      operator: "Equal"
+      value: "true"
+      effect: NoSchedule
+  labels:
+    app: scanner
+    component: cronHandler
+    environment: prod
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 200m
+    limits:
+      memory: 256Mi
+      cpu: 300m
+  schedules:
+    queue-deferred:
+      command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-deferred"'
+      schedule: "* * * * *"
+#    hour:
+#      command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run tool stuckInProcessTasksRestarter"'
+#      schedule: "0 * * * *"
+
 autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 1
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
-nodeSelector: {}
-tolerations: []
+nodeSelector:
+  group_name: "apps-web"
+tolerations:
+  - key: node-role.kubernetes.io/apps-web
+    operator: "Equal"
+    value: "true"
+    effect: NoSchedule
 affinity: {}
 nameOverride: ""
 fullnameOverride: ""

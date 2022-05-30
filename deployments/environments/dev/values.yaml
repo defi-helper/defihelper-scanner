@@ -43,27 +43,27 @@ ingress:
       hosts:
         - scanner-dev.defihelper.info
 
-broker:
-  maxReplicas: 2
-  maxReadyMessagesForHpa: 25
-  process:
-    labels:
-      app: app
-      component: broker
-      environment: dev
-      queue: process
-    queues:
-      queue:
-        name: queue
-        command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue"'
-        replicas: 1
-        resources:
-          requests:
-            memory: 256Mi
-            cpu: 200m
-          limits:
-            memory: 512Mi
-            cpu: 500m
+#broker:
+#  maxReplicas: 2
+#  maxReadyMessagesForHpa: 25
+#  process:
+#    labels:
+#      app: app
+#      component: broker
+#      environment: dev
+#      queue: process
+#    queues:
+#      queue:
+#        name: queue
+#        command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-consume -- -q scanner_tasks_default"'
+#        replicas: 5
+#        resources:
+#          requests:
+#            memory: 256Mi
+#            cpu: 200m
+#          limits:
+#            memory: 512Mi
+#            cpu: 500m
 
 handlers:
   labels:
@@ -78,9 +78,9 @@ handlers:
       memory: 256Mi
       cpu: 300m
   schedules:
-    hour:
-      command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run tool stuckInProcessTasksRestarter"'
-      schedule: "0 * * * *"
+    queue-deferred:
+      command: '"/bin/sh","-c","ln -s ./configuration/.env ./.env && npm run queue-deferred"'
+      schedule: "* * * * *"
 
 autoscaling:
   enabled: false
