@@ -4,10 +4,13 @@ import { v4 as uuid } from "uuid";
 
 export interface Params {
   listenerId: string;
+  offset?: number;
 }
 
+const PACK_SIZE = 100_000;
+
 export default async (process: Process) => {
-  const { listenerId } = process.task.params as Params;
+  let { listenerId, offset } = process.task.params as Params;
 
   const listener = await container.model
     .contractEventListenerTable()
@@ -15,9 +18,36 @@ export default async (process: Process) => {
     .first();
   if (!listener) throw new Error("Listener not found");
 
+  if (offset === undefined) {
+    const eventsCount = await container.model
+      .contractEventTable()
+      .count()
+      .where("eventListener", listener.id)
+      .first()
+      .then((row) => Number(row?.count ?? 0));
+    if (eventsCount > PACK_SIZE) {
+      const queueService = container.model.queueService();
+      await Promise.all(
+        Array.from(new Array(Math.ceil(eventsCount / PACK_SIZE)).keys()).map(
+          (i) =>
+            queueService.push("fillInteraction", {
+              listenerId,
+              offset: i * PACK_SIZE,
+            })
+        )
+      );
+      return process.done();
+    } else {
+      offset = 0;
+    }
+  }
+
   const events = await container.model
     .contractEventTable()
-    .where("eventListener", listener.id);
+    .where("eventListener", listener.id)
+    .orderBy("id")
+    .limit(PACK_SIZE)
+    .offset(offset);
   await events.reduce(async (prev, event) => {
     await prev;
 
