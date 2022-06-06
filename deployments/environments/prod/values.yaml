@@ -45,7 +45,7 @@ ingress:
 
 broker:
   maxReplicas: 10
-  maxReadyMessagesForHpa: 200
+  maxReadyMessagesForHpa: 500
   process:
     labels:
       app: app
@@ -59,11 +59,11 @@ broker:
         replicas: 1
         resources:
           requests:
-            memory: 1024Mi
-            cpu: 500m
-          limits:
             memory: 2048Mi
-            cpu: 800m
+            cpu: 1
+          limits:
+            memory: 4096Mi
+            cpu: 2
         nodeSelector:
           group_name: "apps-jobs"
         tolerations:
