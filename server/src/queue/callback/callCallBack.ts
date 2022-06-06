@@ -8,7 +8,10 @@ export interface Params {
   events: string[];
 }
 
-const chunk = (arr: {id: string, from: string, transactionHash: string}[], size: number) =>
+const chunk = (
+  arr: { id: string; from: string; transactionHash: string }[],
+  size: number
+) =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
     arr.slice(i * size, i * size + size)
   );
@@ -49,10 +52,37 @@ export default async (process: Process) => {
 
   try {
     if (events.length > 0) {
-      await Promise.all(events.map(eventList => axios.post(callBack.callbackUrl, {
-        eventName: eventListener.name,
-        events: eventList,
-      })))
+      const skipped = await events.reduce<Promise<string[]>>(
+        async (prev, eventList) => {
+          const result = await prev;
+          if (result.length > 0) {
+            return [...result, ...eventList.map(({ id }) => id)];
+          }
+
+          try {
+            await axios.post(callBack.callbackUrl, {
+              eventName: eventListener.name,
+              events: eventList,
+            });
+
+            return [];
+          } catch (e) {
+            if (e instanceof Error) {
+              return [...result, ...eventList.map(({ id }) => id)];
+            }
+            throw e;
+          }
+        },
+        Promise.resolve([])
+      );
+      if (skipped.length > 0) {
+        return process
+          .param({
+            id,
+            events: skipped,
+          })
+          .later(dayjs().add(5, "minutes").toDate());
+      }
     }
 
     return process.done();

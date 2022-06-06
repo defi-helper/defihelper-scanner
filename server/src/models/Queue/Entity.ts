@@ -6,7 +6,14 @@ export function hasHandler(handler: string): handler is keyof typeof Handlers {
 }
 
 export class Process {
-  constructor(readonly task: Task = task) { }
+  constructor(readonly task: Task = task) {}
+
+  param(params: Object) {
+    return new Process({
+      ...this.task,
+      params,
+    });
+  }
 
   info(msg: string) {
     return new Process({
@@ -61,7 +68,7 @@ export interface Task {
   error: string;
   priority: number;
   topic: string;
-  timeout: number|null;
+  timeout: number | null;
   retries: number;
   updatedAt: Date;
   createdAt: Date;
