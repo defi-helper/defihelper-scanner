@@ -44,7 +44,7 @@ ingress:
         - scanner.defihelper.io
 
 broker:
-  maxReplicas: 10
+  maxReplicas: 5
   maxReadyMessagesForHpa: 500
   process:
     labels:
